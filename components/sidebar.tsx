@@ -31,9 +31,12 @@ export default function Sidebar() {
         </ul>
       </nav>
       <div className='px-4 py-3 mt-auto'>
-        <button className='w-full bg-blue-500 text-white py-2 px-4 rounded-md'>
+        <Link
+          href='/new'
+          className='w-full bg-blue-500 text-white py-2 px-4 rounded-md'
+        >
           New document
-        </button>
+        </Link>
       </div>
       <div className='px-4 py-3'>
         <h3 className='font-medium text-gray-700 mb-3'>Join signing</h3>
