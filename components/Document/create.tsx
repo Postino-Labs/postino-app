@@ -1,10 +1,14 @@
 import React, { useCallback, useState } from 'react';
 import { useDocumentContext } from '@/contexts/DocumentContext';
 import { useDropzone } from 'react-dropzone';
+import { Document, Page, pdfjs } from 'react-pdf';
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 interface Recipient {
   name: string;
   email: string;
+  web3Address?: string;
 }
 
 const CreateDocument: React.FC<{
@@ -15,12 +19,15 @@ const CreateDocument: React.FC<{
   const [newRecipient, setNewRecipient] = useState<Recipient>({
     name: '',
     email: '',
+    web3Address: '',
   });
+  const [numPages, setNumPages] = useState<number | null>(null);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
-        setState((prevState) => ({ ...prevState, file: acceptedFiles[0] }));
+        const file = acceptedFiles[0];
+        setState((prevState) => ({ ...prevState, file }));
       }
     },
     [setState]
@@ -48,7 +55,7 @@ const CreateDocument: React.FC<{
         ...prevState,
         recipients: [...(prevState.recipients || []), newRecipient],
       }));
-      setNewRecipient({ name: '', email: '' });
+      setNewRecipient({ name: '', email: '', web3Address: '' });
     }
   };
 
@@ -59,10 +66,50 @@ const CreateDocument: React.FC<{
     }));
   };
 
+  const handleRequireWorldIDChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setState((prevState) => ({
+      ...prevState,
+      requireWorldID: e.target.checked,
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log(state);
     onNext();
+  };
+
+  const renderPreview = () => {
+    if (!state.file) return null;
+
+    if (state.file.type.startsWith('image/')) {
+      return (
+        <img
+          src={URL.createObjectURL(state.file)}
+          alt='Preview'
+          className='w-full h-full object-cover'
+        />
+      );
+    } else if (state.file.type === 'application/pdf') {
+      return (
+        <Document
+          file={state.file}
+          onLoadSuccess={({ numPages }: any) => setNumPages(numPages)}
+          className='w-full h-full'
+        >
+          <Page
+            pageNumber={1}
+            className='w-full h-full'
+            renderTextLayer={false}
+            renderAnnotationLayer={false}
+          />
+        </Document>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -72,20 +119,30 @@ const CreateDocument: React.FC<{
         <div className='mb-6'>
           <div
             {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${
+            className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer h-64 relative overflow-hidden ${
               isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
             }`}
           >
             <input {...getInputProps()} />
             {state.file ? (
-              <p>File selected: {state.file.name}</p>
+              <div className='absolute inset-0'>
+                {renderPreview()}
+                <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300'>
+                  <p className='text-white'>Click or drag to change file</p>
+                </div>
+              </div>
             ) : (
-              <p>Drag and drop your file here or click to browse</p>
+              <div className='flex items-center justify-center h-full'>
+                <p>Drag and drop your file here or click to browse</p>
+              </div>
             )}
           </div>
           <p className='mt-2 text-sm text-gray-500'>
             Supported formats: PDF, PNG, JPG, JPEG
           </p>
+          {state.file && (
+            <p className='mt-2'>File selected: {state.file.name}</p>
+          )}
         </div>
 
         <div className='mb-4'>
@@ -94,6 +151,7 @@ const CreateDocument: React.FC<{
             <div key={index} className='flex items-center mb-2'>
               <span className='mr-2'>
                 {recipient.name} ({recipient.email})
+                {recipient.web3Address && ` - ${recipient.web3Address}`}
               </span>
               <button
                 type='button'
@@ -122,6 +180,16 @@ const CreateDocument: React.FC<{
               className='border rounded-md p-2'
             />
           </div>
+          <div className='mt-2'>
+            <input
+              type='text'
+              name='web3Address'
+              placeholder='Web3 Address (optional)'
+              value={newRecipient.web3Address}
+              onChange={handleNewRecipientChange}
+              className='border rounded-md p-2 w-full'
+            />
+          </div>
           <button
             type='button'
             onClick={addRecipient}
@@ -129,6 +197,22 @@ const CreateDocument: React.FC<{
           >
             Add Recipient
           </button>
+        </div>
+
+        <div className='mb-4'>
+          <label className='flex items-center'>
+            <input
+              type='checkbox'
+              checked={state.requireWorldID}
+              onChange={handleRequireWorldIDChange}
+              className='mr-2'
+            />
+            Require World ID verification
+          </label>
+          <p className='text-sm text-gray-600 mt-1'>
+            Enabling World ID verification will require signers to verify their
+            identity.
+          </p>
         </div>
 
         <p className='text-sm text-gray-600 mb-4'>
