@@ -14,17 +14,17 @@ export default function Sidebar() {
             </Link>
           </li>
           <li>
-            <Link href='/documents' className='block px-4 py-2 text-gray-600'>
+            <Link href='/dashboard' className='block px-4 py-2 text-gray-600'>
               Documents
             </Link>
           </li>
           <li>
-            <Link href='/templates' className='block px-4 py-2 text-gray-600'>
+            <Link href='/dashboard' className='block px-4 py-2 text-gray-600'>
               Templates
             </Link>
           </li>
           <li>
-            <Link href='/teams' className='block px-4 py-2 text-gray-600'>
+            <Link href='/dashboard' className='block px-4 py-2 text-gray-600'>
               Team
             </Link>
           </li>
