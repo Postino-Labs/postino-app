@@ -62,7 +62,7 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
           {isAuthenticated && (
             <div className='flex items-center'>
               <span className='text-sm text-gray-600 mr-2 hidden sm:inline'>
-                Signed in with Alchemy as
+                Signed in with {authType} as
               </span>
               <span className='text-sm font-medium text-gray-900 bg-gray-100 px-3 py-1 rounded-full truncate max-w-[200px]'>
                 {authType === 'worldcoin'
