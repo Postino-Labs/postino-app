@@ -1,12 +1,73 @@
-import React from 'react';
-import { useDocumentContext } from '@/contexts/DocumentContext';
+import React, { useState } from 'react';
 import { FiFile, FiUsers, FiCheck, FiX } from 'react-icons/fi';
+import axios from 'axios';
+import { useDocumentContext } from '@/contexts/DocumentContext';
+import { useAuth } from '@/hooks/useAuth';
 
 const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
   onNext,
   onPrev,
 }) => {
-  const { state } = useDocumentContext();
+  const { user, authType } = useAuth();
+  const { state, setState } = useDocumentContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const creatorId = authType === 'worldcoin' ? user.name : user.address;
+  const handleConfirm = async () => {
+    if (!creatorId) return setError('No user logged in');
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Check if the document already exists in the state
+      if (state.documentId) {
+        console.log('Document already exists:', state.documentId);
+        onNext();
+        return;
+      }
+
+      // Check if the document already exists in the database
+      const checkResponse = await axios.get(
+        `/api/check-document?ipfsHash=${state.ipfsHash}`
+      );
+
+      if (checkResponse.data.exists) {
+        console.log('Document already exists:', checkResponse.data.documentId);
+        setState((prevState) => ({
+          ...prevState,
+          documentId: checkResponse.data.documentId,
+        }));
+        onNext();
+        return;
+      }
+
+      // If the document doesn't exist, create a new one
+      const response = await axios.post('/api/initiate-document', {
+        ipfsHash: state.ipfsHash,
+        requiredSignatures: state.recipients.length + 1,
+        worldcoinProofRequired: state.requireWorldID,
+        creatorId,
+      });
+
+      if (response.data.documentId) {
+        setState((prevState) => ({
+          ...prevState,
+          documentId: response.data.documentId,
+        }));
+        onNext();
+      } else {
+        setError('Failed to initiate document. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error initiating document:', error);
+      setError(
+        'An error occurred while initiating the document. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className='max-w-2xl mx-auto p-6'>
@@ -70,18 +131,32 @@ const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
         </div>
       </div>
 
+      {error && (
+        <div
+          className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4'
+          role='alert'
+        >
+          <strong className='font-bold'>Error: </strong>
+          <span className='block sm:inline'>{error}</span>
+        </div>
+      )}
+
       <div className='flex justify-between mt-6'>
         <button
           onClick={onPrev}
           className='bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-300'
+          disabled={isLoading}
         >
           Previous
         </button>
         <button
-          onClick={onNext}
-          className='bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300'
+          onClick={handleConfirm}
+          className={`bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300 ${
+            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+          disabled={isLoading}
         >
-          Confirm and Continue
+          {isLoading ? 'Initiating...' : 'Confirm and Continue'}
         </button>
       </div>
     </div>
