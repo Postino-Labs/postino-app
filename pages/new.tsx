@@ -61,8 +61,9 @@ const DocumentStepper: React.FC = () => {
     setState({
       file: null,
       recipients: [],
-      requireWorldID: false,
-      ipfsHash: '',
+      requireWorldID: true,
+      ipfsHash: 'QmaZkBk8myT8erNSLyUd27B9ks2xa4rMNhMvQVEaikNZ6N',
+      //   ipfsHash: '',
       attestation: null,
       creatorSignature: null,
       currentStep: 1,

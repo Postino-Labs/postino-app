@@ -13,15 +13,29 @@ const UploadToIPFS: React.FC<UploadToIPFSProps> = ({ onNext, onPrev }) => {
   const [error, setError] = useState<string | null>(null);
 
   const handleUpload = async () => {
+    if (!state.file) {
+      setError('No file selected');
+      return;
+    }
+
     setIsUploading(true);
     setError(null);
+
+    const formData = new FormData();
+    formData.append('file', state.file);
+
     try {
-      // Implement your IPFS upload logic here
-      // For example, using Pinata API
-      // const hash = await uploadToPinata(state.file);
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulating upload delay
-      const hash = 'QmX7b5dCRRw4X7zVQeTbmzXrCe2c9W7PVhPPLxiFsRyXXX'; // Replace with actual hash
-      setState((prevState) => ({ ...prevState, ipfsHash: hash }));
+      const response = await fetch('/api/upload-to-ipfs', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Server responded with an error');
+      }
+
+      const data = await response.json();
+      setState((prevState) => ({ ...prevState, ipfsHash: data.ipfsHash }));
     } catch (error) {
       console.error('Error uploading to IPFS:', error);
       setError('Failed to upload. Please try again.');

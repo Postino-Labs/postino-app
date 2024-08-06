@@ -42,8 +42,9 @@ export const DocumentProvider: React.FC<{ children: ReactNode }> = ({
   const [state, setState] = useState<DocumentState>({
     file: null,
     recipients: [],
-    requireWorldID: false,
-    ipfsHash: '',
+    requireWorldID: true,
+    ipfsHash: 'QmaZkBk8myT8erNSLyUd27B9ks2xa4rMNhMvQVEaikNZ6N',
+    //   ipfsHash: '',
     attestation: null,
     currentStep: 1,
     // Initialize other state properties here
