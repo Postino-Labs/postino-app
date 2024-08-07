@@ -10,12 +10,12 @@ export const eas = new EAS(EASContractAddress);
 export const documentSchemaUID: string =
   '0xb882e2b7e92030c758903470105e4941c74b67ec13a92676a4004ef2492deed1';
 export const signatureSchemaUID: string =
-  '0xf431a5baa7c9ce87e7539c353a17c23d1ec65a3319b102fff44d73d13cb84f32';
+  '0x81eda0d9ce8c4b8b211e8700215bd854703d21f44da8f35985f7e9d25228a438';
 
 // Schema encoders
 export const documentSchemaEncoder = new SchemaEncoder(
   'uint8 requiredSignatures,bytes32[] signatureUIDs,bytes32 ipfs,bool worldcoinProofRequired'
 );
 export const signatureSchemaEncoder = new SchemaEncoder(
-  'bytes32 documentHash,bytes signature,bytes worldcoinProof'
+  'string documentHash,bytes signature,bytes worldcoinProof'
 );

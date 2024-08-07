@@ -70,34 +70,6 @@ interface SubmitSignatureRequest {
   ethereumAddress?: string;
 }
 
-function encryptIpfsHash(ipfsHash: string): {
-  encryptedHash: string;
-  iv: string;
-} {
-  const secretKey = process.env.ENCRYPTION_KEY!;
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv(
-    'aes-256-cbc',
-    Buffer.from(secretKey, 'hex'),
-    iv
-  );
-  let encrypted = cipher.update(ipfsHash, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return { encryptedHash: encrypted, iv: iv.toString('hex') };
-}
-
-function decryptIpfsHash(encryptedHash: string, iv: string): string {
-  const secretKey = process.env.ENCRYPTION_KEY!;
-  const decipher = crypto.createDecipheriv(
-    'aes-256-cbc',
-    Buffer.from(secretKey, 'hex'),
-    Buffer.from(iv, 'hex')
-  );
-  let decrypted = decipher.update(encryptedHash, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-  return decrypted;
-}
-
 async function getOrCreateUser(
   worldcoinId: string | undefined,
   ethereumAddress: string | undefined
@@ -222,27 +194,12 @@ export default async function handler(
       });
     }
 
-    const { encryptedHash, iv } = encryptIpfsHash(ipfsHash);
-    const documentHash = ethers.keccak256(
-      ethers.concat([ethers.toUtf8Bytes(encryptedHash), ethers.toUtf8Bytes(iv)])
-    );
-
-    // Log the original IPFS hash and the ability to recover it
-    console.log('Original IPFS hash:', ipfsHash);
-    console.log('Encrypted hash:', encryptedHash);
-    console.log('IV:', iv);
-    console.log('Document hash:', documentHash);
-
-    // Demonstrate recovery
-    const recoveredIpfsHash = decryptIpfsHash(encryptedHash, iv);
-    console.log('Recovered IPFS hash:', recoveredIpfsHash);
-    console.log('Recovery successful:', ipfsHash === recoveredIpfsHash);
-
     const _worldcoinProof = worldcoinProof ?? '0x';
     const _signature = signature ?? '0x';
 
+    // Use this documentHash in the encodedData
     const encodedData = schemaEncoder.encodeData([
-      { name: 'documentHash', value: documentHash, type: 'bytes32' },
+      { name: 'documentHash', value: ipfsHash, type: 'string' },
       { name: 'signature', value: _signature, type: 'bytes' },
       {
         name: 'worldcoinProof',
@@ -292,8 +249,6 @@ export default async function handler(
       .update({
         signatures: [...document.signatures, newAttestationUID],
         remaining_signatures: document.remaining_signatures - 1,
-        encrypted_ipfs_hash: encryptedHash,
-        ipfs_hash_iv: iv,
         encoded_offchain_attestation: JSON.stringify(offchainAttestation),
       })
       .eq('ipfs_hash', ipfsHash)

@@ -6,6 +6,11 @@ export function useAuth() {
   const web3User = useUser();
   const signerStatus = useSignerStatus();
   const isLoading = status === 'loading' || signerStatus.isInitializing;
+  const account = isLoading
+    ? null
+    : session
+    ? session.user.name
+    : web3User?.address;
 
   if (session) {
     return {
@@ -15,6 +20,7 @@ export function useAuth() {
       status: status,
       isLoading,
       session,
+      account,
     };
   } else if (web3User) {
     return {
@@ -25,6 +31,7 @@ export function useAuth() {
       isAuthenticated: true,
       authType: 'alchemy',
       status: 'authenticated',
+      account,
       isLoading,
     };
   } else {
@@ -33,6 +40,7 @@ export function useAuth() {
       isAuthenticated: false,
       authType: null,
       status: status,
+      account,
       isLoading,
     };
   }

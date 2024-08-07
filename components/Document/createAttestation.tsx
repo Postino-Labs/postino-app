@@ -88,7 +88,7 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
       const payload = {
         ipfsHash: state.ipfsHash,
         worldcoinProof: creatorSignatureObj.proof,
-        worldcoinId: creatorId, // Using nullifier_hash as worldcoinId
+        worldcoinId: creatorId, // Using nullifier_hash as worldcoinId (?)
       };
 
       // Make the API call to create the attestation
@@ -98,7 +98,7 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
         const attestationResult = {
           id: response.data.newAttestationUID,
           documentHash: ethers.keccak256(ethers.toUtf8Bytes(state.ipfsHash)),
-          worldcoinProof: creatorSignatureObj.nullifier_hash,
+          worldcoinProof: creatorSignatureObj.proof,
           isComplete: response.data.isComplete,
           easExplorerUrl: response.data.easExplorerUrl,
         };
