@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { FiCheckCircle, FiAlertTriangle, FiLock } from 'react-icons/fi';
+import { FiCheckCircle, FiAlertTriangle, FiLock, FiX } from 'react-icons/fi';
 import { VerificationLevel, IDKitWidget } from '@worldcoin/idkit';
 import type { ISuccessResult } from '@worldcoin/idkit';
 import axios from 'axios';
 import { ethers } from 'ethers';
 
 import { useDocumentContext } from '@/contexts/DocumentContext';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CreateAttestationProps {
   onNext: () => void;
@@ -16,9 +17,12 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
   onNext,
   onPrev,
 }) => {
+  const { user, authType } = useAuth();
   const { state, setState } = useDocumentContext();
   const [isCreatingAttestation, setIsCreatingAttestation] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const creatorId = authType === 'worldcoin' ? user.name : user.address;
 
   const app_id = process.env.NEXT_PUBLIC_WLD_APP_ID as `app_${string}`;
   const action = process.env.NEXT_PUBLIC_WLD_ACTION;
@@ -77,33 +81,46 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
         throw new Error('Missing required data for attestation');
       }
 
-      // Convert IPFS hash to bytes32
-      const documentHash = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes(state.ipfsHash)
-      );
+      // Parse the creatorSignature JSON string back into an object
+      const creatorSignatureObj = JSON.parse(state.creatorSignature);
 
-      const worldcoinProof = state.creatorSignature;
-
-      // Here you would typically make an API call to create the attestation
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // In a real scenario, you'd get this ID from your API response after creating the attestation
-      const attestationId =
-        'attest-0x' + Math.random().toString(16).slice(2, 14);
-
-      const attestationResult = {
-        id: attestationId,
-        documentHash,
-        worldcoinProof,
+      // Prepare the request payload
+      const payload = {
+        ipfsHash: state.ipfsHash,
+        worldcoinProof: creatorSignatureObj.proof,
+        worldcoinId: creatorId, // Using nullifier_hash as worldcoinId
       };
 
-      setState((prevState) => ({
-        ...prevState,
-        attestation: attestationResult,
-      }));
+      // Make the API call to create the attestation
+      const response = await axios.post('/api/submit-signature', payload);
+
+      if (response.data.newAttestationUID) {
+        const attestationResult = {
+          id: response.data.newAttestationUID,
+          documentHash: ethers.keccak256(ethers.toUtf8Bytes(state.ipfsHash)),
+          worldcoinProof: creatorSignatureObj.nullifier_hash,
+          isComplete: response.data.isComplete,
+          easExplorerUrl: response.data.easExplorerUrl,
+        };
+
+        setState((prevState) => ({
+          ...prevState,
+          attestation: attestationResult,
+        }));
+
+        console.log('Attestation created successfully:', response.data.message);
+      } else {
+        throw new Error(
+          'Failed to create attestation: No attestation UID returned'
+        );
+      }
     } catch (error) {
       console.error('Error creating attestation:', error);
-      setError('Failed to create attestation. Please try again.');
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to create attestation. Please try again.'
+      );
     } finally {
       setIsCreatingAttestation(false);
     }
@@ -120,6 +137,23 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
   return (
     <div className='max-w-2xl mx-auto p-6'>
       <h2 className='text-2xl font-bold mb-6'>Create Attestation</h2>
+
+      {error && (
+        <div className='mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md'>
+          <div className='flex items-center'>
+            <FiAlertTriangle className='flex-shrink-0 h-5 w-5 text-red-500 mr-2' />
+            <p className='font-bold'>Error</p>
+          </div>
+          <p className='mt-2'>{error}</p>
+          <button
+            onClick={() => setError(null)}
+            className='mt-2 text-red-500 hover:text-red-700'
+          >
+            <FiX className='inline-block mr-1' />
+            Dismiss
+          </button>
+        </div>
+      )}
 
       <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
         {state.requireWorldID && !state.creatorSignature && (
@@ -190,12 +224,6 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
               Attestation ID:{' '}
               <span className='font-mono'>{state.attestation.id}</span>
             </p>
-          </div>
-        )}
-
-        {error && (
-          <div className='mt-4 p-4 bg-red-100 text-red-700 rounded-md'>
-            <p className='text-sm'>{error}</p>
           </div>
         )}
       </div>

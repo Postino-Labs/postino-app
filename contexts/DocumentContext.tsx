@@ -44,8 +44,7 @@ export const DocumentProvider: React.FC<{ children: ReactNode }> = ({
     file: null,
     recipients: [],
     requireWorldID: true,
-    ipfsHash: 'QmaZkBk8myT8erNSLyUd27B9ks2xa4rMNhMvQVEaikNZ6N',
-    //   ipfsHash: '',
+    ipfsHash: '',
     attestation: null,
     currentStep: 1,
     // Initialize other state properties here

@@ -24,15 +24,15 @@ export default async function handler(
     const { data, error } = await supabase
       .from('pending_documents')
       .select('id')
-      .eq('ipfs_hash', ipfsHash)
-      .single();
+      .eq('ipfs_hash', ipfsHash);
 
     if (error) {
+      console.error('Supabase error:', error);
       throw error;
     }
 
-    if (data) {
-      res.status(200).json({ exists: true, documentId: data.id });
+    if (data && data.length > 0) {
+      res.status(200).json({ exists: true, documentId: data[0].id });
     } else {
       res.status(200).json({ exists: false });
     }
