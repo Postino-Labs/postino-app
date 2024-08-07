@@ -25,6 +25,8 @@
     "@pinata/sdk": "^2.1.0",
     "@supabase/supabase-js": "^2.45.1",
     "@tanstack/react-query": "^5.51.21",
+    "@worldcoin/idkit": "^1.2.2",
+    "@worldcoin/idkit-core": "^1.2.2",
     "axios": "^1.7.3",
     "ethers": "^5.7.2",
     "formidable": "^3.5.1",

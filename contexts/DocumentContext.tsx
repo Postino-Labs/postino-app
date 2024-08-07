@@ -12,7 +12,7 @@ interface DocumentState {
   requireWorldID: boolean;
   ipfsHash: string;
   attestation: any; // You might want to define a more specific type for the attestation
-  creatorSignature?: string | null;
+  creatorSignature?: any;
   currentStep: number;
   documentId?: string;
   // Add any other state properties here

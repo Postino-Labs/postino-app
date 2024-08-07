@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { useDocumentContext } from '@/contexts/DocumentContext';
 import { FiCheckCircle, FiAlertTriangle, FiLock } from 'react-icons/fi';
+import { VerificationLevel, IDKitWidget } from '@worldcoin/idkit';
+import type { ISuccessResult } from '@worldcoin/idkit';
+import axios from 'axios';
+import { ethers } from 'ethers';
+
+import { useDocumentContext } from '@/contexts/DocumentContext';
 
 interface CreateAttestationProps {
   onNext: () => void;
@@ -12,22 +17,55 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
   onPrev,
 }) => {
   const { state, setState } = useDocumentContext();
-  const [isVerifying, setIsVerifying] = useState(false);
   const [isCreatingAttestation, setIsCreatingAttestation] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleWorldIDVerification = async () => {
-    setIsVerifying(true);
-    setError(null);
+  const app_id = process.env.NEXT_PUBLIC_WLD_APP_ID as `app_${string}`;
+  const action = process.env.NEXT_PUBLIC_WLD_ACTION;
+
+  if (!app_id) {
+    throw new Error('app_id is not set in environment variables!');
+  }
+  if (!action) {
+    throw new Error('action is not set in environment variables!');
+  }
+
+  const onSuccess = (result: ISuccessResult) => {
+    console.log('WorldID verification successful:', result);
+    setState((prevState) => ({
+      ...prevState,
+      creatorSignature: JSON.stringify(result),
+      // creatorSignature: result.nullifier_hash,
+    }));
+  };
+
+  const handleProof = async (result: ISuccessResult) => {
     try {
-      // Implement World ID verification logic here
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulating verification delay
-      setState((prevState) => ({ ...prevState, creatorSignature: 'verified' }));
+      console.log(
+        'Proof received from IDKit, sending to backend:',
+        JSON.stringify(result)
+      );
+      const response = await axios.post('/api/verify-worldid', {
+        proof: {
+          merkle_root: result.merkle_root,
+          nullifier_hash: result.nullifier_hash,
+          proof: result.proof,
+          verification_level: result.verification_level,
+        },
+      });
+
+      if (response.data.success) {
+        console.log(
+          'Successful response from backend:',
+          JSON.stringify(response.data)
+        );
+        onSuccess(result);
+      } else {
+        throw new Error(`Verification failed: ${response.data.detail}`);
+      }
     } catch (error) {
       console.error('Error during World ID verification:', error);
       setError('World ID verification failed. Please try again.');
-    } finally {
-      setIsVerifying(false);
     }
   };
 
@@ -35,10 +73,30 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
     setIsCreatingAttestation(true);
     setError(null);
     try {
-      // Implement your attestation creation logic here
-      // For example, using EAS
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulating attestation creation delay
-      const attestationResult = { id: 'attest-0x1234567890abcdef' }; // Replace with actual attestation
+      if (!state.ipfsHash || !state.creatorSignature) {
+        throw new Error('Missing required data for attestation');
+      }
+
+      // Convert IPFS hash to bytes32
+      const documentHash = ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(state.ipfsHash)
+      );
+
+      const worldcoinProof = state.creatorSignature;
+
+      // Here you would typically make an API call to create the attestation
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // In a real scenario, you'd get this ID from your API response after creating the attestation
+      const attestationId =
+        'attest-0x' + Math.random().toString(16).slice(2, 14);
+
+      const attestationResult = {
+        id: attestationId,
+        documentHash,
+        worldcoinProof,
+      };
+
       setState((prevState) => ({
         ...prevState,
         attestation: attestationResult,
@@ -74,13 +132,22 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
               You must complete World ID verification before creating the
               attestation.
             </p>
-            <button
-              onClick={handleWorldIDVerification}
-              disabled={isVerifying}
-              className='bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 disabled:bg-gray-400 transition-colors duration-300'
+            <IDKitWidget
+              action={action}
+              app_id={app_id}
+              onSuccess={onSuccess}
+              handleVerify={handleProof}
+              verification_level={VerificationLevel.Device}
             >
-              {isVerifying ? 'Verifying...' : 'Complete World ID Verification'}
-            </button>
+              {({ open }) => (
+                <button
+                  onClick={open}
+                  className='bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition-colors duration-300'
+                >
+                  Complete World ID Verification
+                </button>
+              )}
+            </IDKitWidget>
           </div>
         )}
 
