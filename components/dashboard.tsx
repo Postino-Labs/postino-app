@@ -1,5 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/utils/supabase';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function Dashboard() {
@@ -17,7 +18,7 @@ export default function Dashboard() {
       .from('pending_documents')
       .select('*, users!inner(*)')
       .eq('users.worldcoin_id', account);
-    console.log({ createdDocs });
+
     if (pendingError)
       console.error('Error fetching pending documents:', pendingError);
     else setPendingDocs(createdDocs || []);
@@ -32,7 +33,6 @@ export default function Dashboard() {
       .order('created_at', { ascending: false })
       .limit(5);
 
-    console.log({ signedDocuments });
     if (recentError)
       console.error('Error fetching signed documents:', recentError);
     else setSignedDocs(signedDocuments || []);
@@ -86,9 +86,14 @@ export default function Dashboard() {
                   Signed at: {new Date(doc.created_at).toLocaleDateString()}
                 </p>
               </div>
-              <button className='px-4 py-2 bg-gray-100 rounded-md text-gray-700 hover:bg-gray-200 transition duration-200'>
+              <Link
+                href={{
+                  pathname: `/document/${doc.pending_documents.ipfs_hash}`,
+                }}
+                className='px-4 py-2 bg-gray-100 rounded-md text-gray-700 hover:bg-gray-200 transition duration-200'
+              >
                 View Details
-              </button>
+              </Link>
             </div>
           ))}
         </div>
