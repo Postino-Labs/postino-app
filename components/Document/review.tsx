@@ -36,6 +36,7 @@ const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
         console.log('Document already exists:', checkResponse.data.documentId);
         setState((prevState) => ({
           ...prevState,
+          isConfirmed: true,
           documentId: checkResponse.data.documentId,
         }));
         onNext();
@@ -53,6 +54,7 @@ const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
       if (response.data.documentId) {
         setState((prevState) => ({
           ...prevState,
+          isConfirmed: true,
           documentId: response.data.documentId,
         }));
         onNext();
@@ -70,7 +72,7 @@ const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
   };
 
   return (
-    <div className='max-w-2xl mx-auto p-6'>
+    <div className='max-w-3xl mx-auto'>
       <h2 className='text-2xl font-bold mb-6'>Review Document</h2>
 
       <div className='bg-white shadow-md rounded-lg p-6 mb-6'>

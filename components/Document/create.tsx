@@ -2,6 +2,12 @@ import React, { useCallback, useState } from 'react';
 import { useDocumentContext } from '@/contexts/DocumentContext';
 import { useDropzone } from 'react-dropzone';
 import { Document, Page, pdfjs } from 'react-pdf';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { FiPlus, FiTrash2, FiUpload } from 'react-icons/fi';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -66,12 +72,10 @@ const CreateDocument: React.FC<{
     }));
   };
 
-  const handleRequireWorldIDChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleRequireWorldIDChange = (checked: boolean) => {
     setState((prevState) => ({
       ...prevState,
-      requireWorldID: e.target.checked,
+      requireWorldID: checked,
     }));
   };
 
@@ -97,11 +101,11 @@ const CreateDocument: React.FC<{
         <Document
           file={state.file}
           onLoadSuccess={({ numPages }: any) => setNumPages(numPages)}
-          className='w-full h-full'
+          className='w-full'
         >
           <Page
             pageNumber={1}
-            className='w-full h-full'
+            width={window.innerWidth * 0.38}
             renderTextLayer={false}
             renderAnnotationLayer={false}
           />
@@ -113,120 +117,130 @@ const CreateDocument: React.FC<{
   };
 
   return (
-    <div className='max-w-2xl mx-auto p-6'>
-      <h1 className='text-2xl font-bold mb-6'>Create a new document</h1>
-      <form onSubmit={handleSubmit}>
-        <div className='mb-6'>
-          <div
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer h-64 relative overflow-hidden ${
-              isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-            }`}
-          >
-            <input {...getInputProps()} />
-            {state.file ? (
-              <div className='absolute inset-0'>
-                {renderPreview()}
-                <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300'>
-                  <p className='text-white'>Click or drag to change file</p>
+    <Card className='max-w-4xl mx-auto'>
+      <CardHeader>
+        <CardTitle className='text-2xl font-bold'>
+          Create a new document
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className='space-y-6'>
+          <div>
+            <div
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer h-80 relative overflow-hidden ${
+                isDragActive
+                  ? 'border-yellow-500 bg-yellow-50'
+                  : 'border-gray-300'
+              }`}
+            >
+              <input {...getInputProps()} />
+              {state.file ? (
+                <div className='absolute inset-0'>
+                  {renderPreview()}
+                  <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300'>
+                    <p className='text-white'>Click or drag to change file</p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className='flex items-center justify-center h-full'>
-                <p>Drag and drop your file here or click to browse</p>
-              </div>
+              ) : (
+                <div className='flex flex-col items-center justify-center h-full'>
+                  <FiUpload className='text-4xl text-gray-400 mb-2' />
+                  <p>Drag and drop your file here or click to browse</p>
+                </div>
+              )}
+            </div>
+            <p className='mt-2 text-sm text-gray-500'>
+              Supported formats: PDF, PNG, JPG, JPEG
+            </p>
+            {state.file && (
+              <p className='mt-2 text-sm font-medium text-yellow-600'>
+                File selected: {state.file.name}
+              </p>
             )}
           </div>
-          <p className='mt-2 text-sm text-gray-500'>
-            Supported formats: PDF, PNG, JPG, JPEG
-          </p>
-          {state.file && (
-            <p className='mt-2'>File selected: {state.file.name}</p>
-          )}
-        </div>
 
-        <div className='mb-4'>
-          <h2 className='text-lg font-semibold mb-2'>Invite people to sign</h2>
-          {state.recipients?.map((recipient, index) => (
-            <div key={index} className='flex items-center mb-2'>
-              <span className='mr-2'>
-                {recipient.name} ({recipient.email})
-                {recipient.web3Address && ` - ${recipient.web3Address}`}
-              </span>
-              <button
-                type='button'
-                onClick={() => removeRecipient(index)}
-                className='text-red-500 hover:text-red-700'
+          <div>
+            <h2 className='text-lg font-semibold mb-2'>
+              Invite people to sign
+            </h2>
+            {state.recipients?.map((recipient, index) => (
+              <div
+                key={index}
+                className='flex items-center justify-between bg-gray-50 p-2 rounded mb-2'
               >
-                Remove
-              </button>
+                <span>
+                  {recipient.name} ({recipient.email})
+                  {recipient.web3Address && ` - ${recipient.web3Address}`}
+                </span>
+                <Button
+                  type='button'
+                  variant='ghost'
+                  onClick={() => removeRecipient(index)}
+                  className='text-red-500 hover:text-red-700'
+                >
+                  <FiTrash2 />
+                </Button>
+              </div>
+            ))}
+            <div className='grid grid-cols-2 gap-4 mt-4'>
+              <Input
+                type='text'
+                name='name'
+                placeholder='Name'
+                value={newRecipient.name}
+                onChange={handleNewRecipientChange}
+              />
+              <Input
+                type='email'
+                name='email'
+                placeholder='Email'
+                value={newRecipient.email}
+                onChange={handleNewRecipientChange}
+              />
             </div>
-          ))}
-          <div className='grid grid-cols-2 gap-4 mt-4'>
-            <input
-              type='text'
-              name='name'
-              placeholder='Name'
-              value={newRecipient.name}
-              onChange={handleNewRecipientChange}
-              className='border rounded-md p-2'
-            />
-            <input
-              type='email'
-              name='email'
-              placeholder='Email'
-              value={newRecipient.email}
-              onChange={handleNewRecipientChange}
-              className='border rounded-md p-2'
-            />
-          </div>
-          <div className='mt-2'>
-            <input
+            <Input
               type='text'
               name='web3Address'
               placeholder='Web3 Address (optional)'
               value={newRecipient.web3Address}
               onChange={handleNewRecipientChange}
-              className='border rounded-md p-2 w-full'
+              className='mt-2'
             />
+            <Button
+              type='button'
+              onClick={addRecipient}
+              className='mt-2 bg-yellow-400 text-white hover:bg-yellow-500'
+            >
+              <FiPlus className='mr-2' /> Add Recipient
+            </Button>
           </div>
-          <button
-            type='button'
-            onClick={addRecipient}
-            className='mt-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600'
-          >
-            Add Recipient
-          </button>
-        </div>
 
-        <div className='mb-4'>
-          <label className='flex items-center'>
-            <input
-              type='checkbox'
+          <div className='flex items-center space-x-2'>
+            <Checkbox
+              id='worldID'
               checked={state.requireWorldID}
-              onChange={handleRequireWorldIDChange}
-              className='mr-2'
+              onCheckedChange={handleRequireWorldIDChange}
             />
-            Require World ID verification
-          </label>
-          <p className='text-sm text-gray-600 mt-1'>
+            <Label htmlFor='worldID'>Require World ID verification</Label>
+          </div>
+          <p className='text-sm text-gray-600'>
             Enabling World ID verification will require signers to verify their
             identity.
           </p>
-        </div>
 
-        <p className='text-sm text-gray-600 mb-4'>
-          All added recipients will be required to sign the document.
-        </p>
+          <p className='text-sm text-gray-600'>
+            All added recipients will be required to sign the document.
+          </p>
 
-        <button
-          type='submit'
-          className='bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600'
-        >
-          Next
-        </button>
-      </form>
-    </div>
+          <Button
+            type='submit'
+            className='bg-yellow-400 text-white hover:bg-yellow-500'
+          >
+            Next
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -5,14 +5,17 @@ import UploadToIPFS from '@/components/Document/uploadToIPFS';
 import CreateAttestation from '@/components/Document/createAttestation';
 import ReviewStep from '@/components/Document/review';
 import Layout from '@/components/layout';
-import { FiLock, FiTrash2 } from 'react-icons/fi';
+import { FiLock, FiTrash2, FiCheck } from 'react-icons/fi';
 import SuccessView from '@/components/Document/success';
+import { motion } from 'framer-motion';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 const steps = [
-  { id: 1, name: 'Create Document' },
-  { id: 2, name: 'Upload to IPFS' },
-  { id: 3, name: 'Review' },
-  { id: 4, name: 'Create Attestation' },
+  { id: 1, name: 'Create Document', icon: 'FiFileText' },
+  { id: 2, name: 'Upload to IPFS', icon: 'FiUploadCloud' },
+  { id: 3, name: 'Review', icon: 'FiEye' },
+  { id: 4, name: 'Create Attestation', icon: 'FiCheckCircle' },
 ];
 
 const DocumentStepper: React.FC = () => {
@@ -42,7 +45,7 @@ const DocumentStepper: React.FC = () => {
     if (stepId === 1) return true;
     if (stepId === 2) return !!state.file;
     if (stepId === 3) return !!state.ipfsHash;
-    if (stepId === 4) return !!state.ipfsHash;
+    if (stepId === 4) return !!state.isConfirmed;
     return false;
   };
 
@@ -89,59 +92,68 @@ const DocumentStepper: React.FC = () => {
 
   return (
     <Layout>
-      <div className='max-w-4xl mx-auto p-6'>
+      <motion.div
+        className='max-w-4xl mx-auto p-6'
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         {!state.attestation && (
-          <nav aria-label='Progress'>
-            <ol className='flex items-center justify-between mb-8'>
-              {steps.map((step) => (
-                <li
-                  key={step.id}
-                  className={`relative ${
-                    state.currentStep >= step.id && isStepAccessible(step.id)
-                      ? 'text-blue-600'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  <button
-                    onClick={() => jumpToStep(step.id)}
-                    disabled={
-                      (isDocumentLocked && step.id < state.currentStep) ||
-                      !isStepAccessible(step.id)
-                    }
-                    className={`group flex items-center ${
-                      (isDocumentLocked && step.id < state.currentStep) ||
-                      !isStepAccessible(step.id)
-                        ? 'cursor-not-allowed opacity-50'
-                        : ''
-                    }`}
-                  >
-                    <span
-                      className={`h-8 w-8 flex items-center justify-center rounded-full border-2 ${
-                        state.currentStep >= step.id &&
-                        isStepAccessible(step.id)
-                          ? 'border-blue-600'
-                          : 'border-gray-300'
-                      } group-hover:border-blue-400 transition-colors duration-150`}
-                    >
-                      {step.id}
-                    </span>
-                    <span className='ml-2 text-sm font-medium group-hover:text-blue-500 transition-colors duration-150'>
-                      {step.name}
-                    </span>
-                    {(isDocumentLocked && step.id < state.currentStep) ||
-                    !isStepAccessible(step.id) ? (
-                      <FiLock className='ml-2 text-gray-400' />
-                    ) : null}
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </nav>
+          <Card className='mb-8'>
+            <CardContent className='pt-6'>
+              <nav aria-label='Progress'>
+                <ol className='flex items-center justify-between'>
+                  {steps.map((step) => (
+                    <li key={step.id} className='relative'>
+                      <Button
+                        variant={
+                          state.currentStep >= step.id &&
+                          isStepAccessible(step.id)
+                            ? 'default'
+                            : 'outline'
+                        }
+                        size='sm'
+                        onClick={() => jumpToStep(step.id)}
+                        disabled={
+                          (isDocumentLocked && step.id < state.currentStep) ||
+                          !isStepAccessible(step.id)
+                        }
+                        className={`w-full ${
+                          (isDocumentLocked && step.id < state.currentStep) ||
+                          !isStepAccessible(step.id)
+                            ? 'opacity-50 cursor-not-allowed'
+                            : ''
+                        }`}
+                      >
+                        <span className='flex items-center justify-center w-8 h-8 mr-2'>
+                          {state.currentStep > step.id ? (
+                            <FiCheck className='text-yellow-600' />
+                          ) : (
+                            <span className='text-yellow-600'>{step.id}</span>
+                          )}
+                        </span>
+                        <span className='text-sm'>{step.name}</span>
+                        {(isDocumentLocked && step.id < state.currentStep) ||
+                        !isStepAccessible(step.id) ? (
+                          <FiLock className='ml-2 text-gray-400' />
+                        ) : null}
+                      </Button>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            </CardContent>
+          </Card>
         )}
         {isDocumentLocked &&
           state.currentStep < steps.length &&
           !state.attestation && (
-            <div className='bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6'>
+            <motion.div
+              className='bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6'
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
               <div className='flex'>
                 <div className='flex-shrink-0'>
                   <FiLock className='h-5 w-5 text-yellow-500' />
@@ -153,19 +165,33 @@ const DocumentStepper: React.FC = () => {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
-        {renderStep()}
-        <div className='mt-6 flex justify-end'>
-          <button
+        <motion.div
+          key={state.currentStep}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+        >
+          {renderStep()}
+        </motion.div>
+        <motion.div
+          className='mt-6 flex justify-end'
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.3 }}
+        >
+          <Button
+            variant='destructive'
             onClick={clearState}
-            className='flex items-center bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors duration-300'
+            className='flex items-center'
           >
             <FiTrash2 className='mr-2' />
             Clear State (Debug)
-          </button>
-        </div>
-      </div>
+          </Button>
+        </motion.div>
+      </motion.div>
     </Layout>
   );
 };

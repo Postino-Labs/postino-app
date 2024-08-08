@@ -15,6 +15,7 @@ interface DocumentState {
   creatorSignature?: any;
   currentStep: number;
   documentId?: string;
+  isConfirmed?: boolean;
   // Add any other state properties here
 }
 
@@ -47,6 +48,7 @@ export const DocumentProvider: React.FC<{ children: ReactNode }> = ({
     ipfsHash: '',
     attestation: null,
     currentStep: 1,
+    isConfirmed: false,
     // Initialize other state properties here
   });
 

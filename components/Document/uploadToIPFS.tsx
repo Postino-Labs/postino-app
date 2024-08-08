@@ -53,7 +53,7 @@ const UploadToIPFS: React.FC<UploadToIPFSProps> = ({ onNext, onPrev }) => {
   };
 
   return (
-    <div className='max-w-2xl mx-auto p-6'>
+    <div className='max-w-3xl mx-auto'>
       <h2 className='text-2xl font-bold mb-6'>Upload to IPFS</h2>
       <div className='mb-8 bg-white shadow-md rounded-lg p-6'>
         <div className='flex items-center justify-center mb-4'>

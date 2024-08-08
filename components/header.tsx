@@ -1,4 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
+import { truncate } from '@/utils/truncate';
 import { useAuthModal, useLogout } from '@account-kit/react';
 import { signIn, signOut } from 'next-auth/react';
 
@@ -66,8 +67,8 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
               </span>
               <span className='text-sm font-medium text-gray-900 bg-gray-100 px-3 py-1 rounded-full truncate max-w-[200px]'>
                 {authType === 'worldcoin'
-                  ? user?.email ?? user.name
-                  : user.address}
+                  ? user?.email ?? truncate(user.name)
+                  : truncate(user.address)}
               </span>
               <button
                 className='ml-4 text-sm text-gray-600 hover:text-gray-900'
