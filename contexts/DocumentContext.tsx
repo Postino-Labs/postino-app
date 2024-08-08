@@ -1,14 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface Recipient {
-  name: string;
-  email: string;
-  web3Address?: string;
+export interface Recipient {
+  web3Address: string;
 }
 
-interface DocumentState {
+export interface DocumentState {
   file: File | null;
-  recipients: Recipient[];
+  recipients: Recipient[] | [];
+  requiredSignatures: number;
   requireWorldID: boolean;
   ipfsHash: string;
   attestation: any; // You might want to define a more specific type for the attestation
@@ -16,6 +15,7 @@ interface DocumentState {
   currentStep: number;
   documentId?: string;
   isConfirmed?: boolean;
+  isLocked?: boolean;
   // Add any other state properties here
 }
 
@@ -44,6 +44,7 @@ export const DocumentProvider: React.FC<{ children: ReactNode }> = ({
   const [state, setState] = useState<DocumentState>({
     file: null,
     recipients: [],
+    requiredSignatures: 1,
     requireWorldID: true,
     ipfsHash: '',
     attestation: null,

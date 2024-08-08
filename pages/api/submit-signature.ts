@@ -153,6 +153,7 @@ export default async function handler(
         .status(400)
         .json({ error: 'Failed to create or retrieve user' });
     }
+
     // Fetch the document from Supabase
     const { data: document, error: fetchError } = await supabase
       .from('pending_documents')
@@ -162,7 +163,6 @@ export default async function handler(
 
     if (fetchError) {
       if (fetchError.code === 'PGRST116') {
-        // PGRST116 is the error code for "Results contain 0 rows"
         return res.status(404).json({ error: 'Document not found' });
       }
       throw fetchError;
@@ -172,7 +172,7 @@ export default async function handler(
       return res.status(404).json({ error: 'Document not found' });
     }
 
-    // Check if the user has already signed
+    // Check if the user has already signed this specific document
     const { data: existingSignature, error: signatureError } = await supabase
       .from('user_signatures')
       .select('*')
@@ -182,10 +182,12 @@ export default async function handler(
 
     if (signatureError && signatureError.code !== 'PGRST116')
       throw signatureError;
-    if (existingSignature)
+
+    if (existingSignature) {
       return res
         .status(400)
         .json({ error: 'User has already signed this document' });
+    }
 
     // Check if more signatures are needed
     if (document.remaining_signatures <= 0) {
@@ -234,15 +236,6 @@ export default async function handler(
     // Instead of tx.wait(), we'll use the UID from the offchain attestation
     const newAttestationUID = offchainAttestation.uid;
 
-    // Use the transformation function before passing data to createOffchainURL
-    // const shareablePackage = transformToShareablePackage(
-    //   offchainAttestation,
-    //   signer
-    // );
-    // console.log({ shareablePackage });
-    // const attestationLink = createOffchainURL(shareablePackage);
-    // console.log({ attestationLink });
-
     // Update the document in Supabase
     const { data: updatedDocument, error: updateError } = await supabase
       .from('pending_documents')
@@ -251,7 +244,7 @@ export default async function handler(
         remaining_signatures: document.remaining_signatures - 1,
         encoded_offchain_attestation: JSON.stringify(offchainAttestation),
       })
-      .eq('ipfs_hash', ipfsHash)
+      .eq('id', document.id)
       .select()
       .single();
 

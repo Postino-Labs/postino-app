@@ -11,7 +11,8 @@ interface InitiateDocumentRequest {
   ipfsHash: string;
   requiredSignatures: number;
   worldcoinProofRequired: boolean;
-  creatorId: string; // This can be either a Worldcoin ID or Ethereum address
+  creatorId: string;
+  recipients: string[];
 }
 
 export default async function handler(
@@ -27,6 +28,7 @@ export default async function handler(
     requiredSignatures,
     worldcoinProofRequired,
     creatorId,
+    recipients,
   }: InitiateDocumentRequest = req.body;
 
   try {
@@ -42,7 +44,10 @@ export default async function handler(
         // User not found, create a new user
         const { data: newUser, error: newUserError } = await supabase
           .from('users')
-          .insert({ worldcoin_id: creatorId }) // Assuming it's a Worldcoin ID, adjust if necessary
+          .insert({
+            worldcoin_id: worldcoinProofRequired ? creatorId : null,
+            ethereum_address: !worldcoinProofRequired ? creatorId : null,
+          })
           .select()
           .single();
 
@@ -68,6 +73,7 @@ export default async function handler(
         signatures: [],
         creator_id: creator.id,
         remaining_signatures: requiredSignatures,
+        recipients: recipients,
       })
       .select()
       .single();
@@ -75,9 +81,29 @@ export default async function handler(
     if (error) throw error;
     if (!data) throw new Error('Failed to insert document');
 
-    res
-      .status(200)
-      .json({ message: 'Document initiated', documentId: data.id });
+    // Only create entries in the document_signers table if there are recipients
+    if (recipients.length > 0) {
+      const signerEntries = recipients.map((recipient) => ({
+        document_id: data.id,
+        user_address: recipient,
+        has_signed: false,
+      }));
+
+      const { error: signerError } = await supabase
+        .from('document_signers')
+        .insert(signerEntries);
+
+      if (signerError) {
+        console.error('Error inserting document signers:', signerError);
+        // Don't throw the error, just log it
+      }
+    }
+
+    res.status(200).json({
+      message: 'Document initiated',
+      documentId: data.id,
+      recipients: recipients,
+    });
   } catch (error) {
     console.error('Error initiating document:', error);
     res.status(500).json({ error: 'Failed to initiate document' });

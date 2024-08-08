@@ -1,10 +1,11 @@
+import { Recipient } from '@/contexts/DocumentContext';
 import React from 'react';
 import { FiFile, FiUsers, FiCheck, FiX } from 'react-icons/fi';
 
 interface DocumentViewProps {
   file: File | null;
   ipfsHash: string;
-  recipients: Array<{ name: string; email: string; web3Address?: string }>;
+  recipients: Recipient[] | [];
   requireWorldID: boolean;
   attestationId: string;
 }
@@ -51,8 +52,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
           <ul className='list-disc pl-5'>
             {recipients.map((recipient, index) => (
               <li key={index}>
-                <strong>{recipient.name}</strong> ({recipient.email})
-                {recipient.web3Address && ` - Web3: ${recipient.web3Address}`}
+                {recipient.web3Address && `${recipient.web3Address}`}
               </li>
             ))}
           </ul>

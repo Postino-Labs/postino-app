@@ -97,15 +97,49 @@ export default function Dashboard() {
                           Remaining signatures: {doc.remaining_signatures}
                         </p>
                       </div>
-                      {doc.remaining_signatures > 0 && (
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          className='text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50'
-                        >
-                          <Share2 className='mr-2 h-4 w-4' />
-                          Share
-                        </Button>
+                      {doc.remaining_signatures > 0 ? (
+                        <div>
+                          <Link
+                            href={{
+                              pathname: `/document/${doc.ipfs_hash}`,
+                            }}
+                            passHref
+                          >
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50'
+                            >
+                              <Eye className='mr-2 h-4 w-4' />
+                              View
+                            </Button>
+                          </Link>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50'
+                          >
+                            <Share2 className='mr-2 h-4 w-4' />
+                          </Button>
+                        </div>
+                      ) : (
+                        doc.ipfs_hash && (
+                          <Link
+                            href={{
+                              pathname: `/document/${doc.ipfs_hash}`,
+                            }}
+                            passHref
+                          >
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50'
+                            >
+                              <Eye className='mr-2 h-4 w-4' />
+                              View
+                            </Button>
+                          </Link>
+                        )
                       )}
                     </motion.div>
                   ))}

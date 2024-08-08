@@ -1,10 +1,48 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { useDocumentContext } from '@/contexts/DocumentContext';
 import DocumentView from './documentView';
 import { FiCheckCircle } from 'react-icons/fi';
 
 const SuccessView: React.FC = () => {
-  const { state } = useDocumentContext();
+  const { state, setState } = useDocumentContext();
+  const router = useRouter();
+
+  const displayState = {
+    file: state.file,
+    ipfsHash: state.ipfsHash,
+    recipients: state.recipients,
+    requireWorldID: state.requireWorldID,
+    attestationId: state.attestation?.id || '',
+  };
+
+  // Function to reset the state
+  const resetState = () => {
+    setState({
+      file: null,
+      recipients: [],
+      requiredSignatures: 1,
+      requireWorldID: false,
+      ipfsHash: '',
+      attestation: null,
+      creatorSignature: null,
+      currentStep: 1,
+      documentId: undefined,
+      isConfirmed: false,
+    });
+  };
+
+  // Reset state when component unmounts
+  useEffect(() => {
+    return () => {
+      resetState();
+    };
+  }, []);
+
+  const handleBackToDashboard = () => {
+    resetState();
+    router.push('/dashboard'); // Adjust this route as needed
+  };
 
   return (
     <div className='max-w-4xl mx-auto p-6'>
@@ -26,18 +64,16 @@ const SuccessView: React.FC = () => {
       </div>
 
       <DocumentView
-        file={state.file}
-        ipfsHash={state.ipfsHash}
-        recipients={state.recipients}
-        requireWorldID={state.requireWorldID}
-        attestationId={state.attestation?.id || ''}
+        file={displayState.file}
+        ipfsHash={displayState.ipfsHash}
+        recipients={displayState?.recipients || []}
+        requireWorldID={displayState.requireWorldID}
+        attestationId={displayState.attestationId}
       />
 
       <div className='mt-6'>
         <button
-          onClick={() => {
-            /* Handle navigation to dashboard or new document creation */
-          }}
+          onClick={handleBackToDashboard}
           className='bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300'
         >
           Back to Dashboard

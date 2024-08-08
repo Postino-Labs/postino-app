@@ -21,7 +21,8 @@ const steps = [
 const DocumentStepper: React.FC = () => {
   const { state, setState } = useDocumentContext();
 
-  const isDocumentLocked = state.creatorSignature || state.attestation;
+  const isDocumentLocked =
+    state.creatorSignature || state.attestation || state.isLocked;
 
   const nextStep = () => {
     if (state.currentStep < steps.length) {
@@ -64,18 +65,18 @@ const DocumentStepper: React.FC = () => {
     setState({
       file: null,
       recipients: [],
+      requiredSignatures: 1,
       requireWorldID: true,
       ipfsHash: '',
       attestation: null,
       creatorSignature: null,
       currentStep: 1,
+      isLocked: false,
+      isConfirmed: false,
     });
   };
 
   const renderStep = () => {
-    if (state.attestation) {
-      return <SuccessView />;
-    }
     switch (state.currentStep) {
       case 1:
         return <CreateDocument onNext={nextStep} />;
@@ -85,10 +86,14 @@ const DocumentStepper: React.FC = () => {
         return <ReviewStep onNext={nextStep} onPrev={prevStep} />;
       case 4:
         return <CreateAttestation onNext={nextStep} onPrev={prevStep} />;
+      case 5:
+        return <SuccessView />;
       default:
         return null;
     }
   };
+
+  const showSteps = state.currentStep <= steps.length;
 
   return (
     <Layout>
@@ -98,7 +103,7 @@ const DocumentStepper: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {!state.attestation && (
+        {showSteps && (
           <Card className='mb-8'>
             <CardContent className='pt-6'>
               <nav aria-label='Progress'>
@@ -106,24 +111,26 @@ const DocumentStepper: React.FC = () => {
                   {steps.map((step) => (
                     <li key={step.id} className='relative'>
                       <Button
-                        variant={
-                          state.currentStep >= step.id &&
-                          isStepAccessible(step.id)
-                            ? 'default'
-                            : 'outline'
-                        }
+                        variant='ghost'
                         size='sm'
                         onClick={() => jumpToStep(step.id)}
                         disabled={
                           (isDocumentLocked && step.id < state.currentStep) ||
                           !isStepAccessible(step.id)
                         }
-                        className={`w-full ${
+                        className={`w-full rounded-none ${
                           (isDocumentLocked && step.id < state.currentStep) ||
                           !isStepAccessible(step.id)
                             ? 'opacity-50 cursor-not-allowed'
                             : ''
-                        }`}
+                        }
+                        ${
+                          state.currentStep >= step.id &&
+                          isStepAccessible(step.id)
+                            ? 'border-b border-b-yellow-400'
+                            : ''
+                        }
+                        `}
                       >
                         <span className='flex items-center justify-center w-8 h-8 mr-2'>
                           {state.currentStep > step.id ? (
@@ -145,28 +152,25 @@ const DocumentStepper: React.FC = () => {
             </CardContent>
           </Card>
         )}
-        {isDocumentLocked &&
-          state.currentStep < steps.length &&
-          !state.attestation && (
-            <motion.div
-              className='bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6'
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className='flex'>
-                <div className='flex-shrink-0'>
-                  <FiLock className='h-5 w-5 text-yellow-500' />
-                </div>
-                <div className='ml-3'>
-                  <p className='text-sm text-yellow-700'>
-                    The document is locked. You cannot go back to previous
-                    steps.
-                  </p>
-                </div>
+        {isDocumentLocked && state.currentStep < steps.length && (
+          <motion.div
+            className='bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6'
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className='flex'>
+              <div className='flex-shrink-0'>
+                <FiLock className='h-5 w-5 text-yellow-500' />
               </div>
-            </motion.div>
-          )}
+              <div className='ml-3'>
+                <p className='text-sm text-yellow-700'>
+                  The document is locked. You cannot go back to previous steps.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
         <motion.div
           key={state.currentStep}
           initial={{ opacity: 0, y: 20 }}
@@ -176,21 +180,23 @@ const DocumentStepper: React.FC = () => {
         >
           {renderStep()}
         </motion.div>
-        <motion.div
-          className='mt-6 flex justify-end'
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.3 }}
-        >
-          <Button
-            variant='destructive'
-            onClick={clearState}
-            className='flex items-center'
+        {showSteps && (
+          <motion.div
+            className='mt-6 flex justify-end'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
           >
-            <FiTrash2 className='mr-2' />
-            Clear State (Debug)
-          </Button>
-        </motion.div>
+            <Button
+              variant='destructive'
+              onClick={clearState}
+              className='flex items-center'
+            >
+              <FiTrash2 className='mr-2' />
+              Clear State (Debug)
+            </Button>
+          </motion.div>
+        )}
       </motion.div>
     </Layout>
   );

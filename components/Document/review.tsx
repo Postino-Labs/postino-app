@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { FiFile, FiUsers, FiCheck, FiX } from 'react-icons/fi';
+import {
+  FiFile,
+  FiUsers,
+  FiCheckCircle,
+  FiXCircle,
+  FiAlertTriangle,
+} from 'react-icons/fi';
 import axios from 'axios';
 import { useDocumentContext } from '@/contexts/DocumentContext';
 import { useAuth } from '@/hooks/useAuth';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
   onNext,
@@ -14,20 +21,19 @@ const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
   const [error, setError] = useState<string | null>(null);
 
   const creatorId = authType === 'worldcoin' ? user.name : user.address;
+
   const handleConfirm = async () => {
     if (!creatorId) return setError('No user logged in');
     setIsLoading(true);
     setError(null);
 
     try {
-      // Check if the document already exists in the state
       if (state.documentId) {
         console.log('Document already exists:', state.documentId);
         onNext();
         return;
       }
 
-      // Check if the document already exists in the database
       const checkResponse = await axios.get(
         `/api/check-document?ipfsHash=${state.ipfsHash}`
       );
@@ -37,17 +43,18 @@ const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
         setState((prevState) => ({
           ...prevState,
           isConfirmed: true,
+          isLocked: true,
           documentId: checkResponse.data.documentId,
         }));
         onNext();
         return;
       }
 
-      // If the document doesn't exist, create a new one
       const response = await axios.post('/api/initiate-document', {
         ipfsHash: state.ipfsHash,
-        requiredSignatures: state.recipients.length + 1,
+        requiredSignatures: state.requiredSignatures,
         worldcoinProofRequired: state.requireWorldID,
+        recipients: state.recipients.map((recipient) => recipient.web3Address),
         creatorId,
       });
 
@@ -55,6 +62,7 @@ const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
         setState((prevState) => ({
           ...prevState,
           isConfirmed: true,
+          isLocked: true,
           documentId: response.data.documentId,
         }));
         onNext();
@@ -72,96 +80,99 @@ const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
   };
 
   return (
-    <div className='max-w-3xl mx-auto'>
-      <h2 className='text-2xl font-bold mb-6'>Review Document</h2>
-
-      <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
-        <h3 className='text-lg font-semibold mb-4 flex items-center'>
-          <FiFile className='mr-2' /> Document Details
-        </h3>
-        <div className='mb-4'>
-          <p>
-            <strong>File Name:</strong> {state.file?.name}
-          </p>
-          <p>
-            <strong>File Type:</strong> {state.file?.type}
-          </p>
-          <p>
-            <strong>File Size:</strong>{' '}
-            {state.file
-              ? `${(state.file.size / 1024 / 1024).toFixed(2)} MB`
-              : 'N/A'}
-          </p>
+    <Card className='max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden'>
+      <CardHeader className='border-b border-yellow-500'>
+        <CardTitle className='text-2xl font-bold text-yellow-900'>
+          Review Document
+        </CardTitle>
+      </CardHeader>
+      <CardContent className='p-6'>
+        <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
+          <h3 className='text-lg font-semibold mb-4 flex items-center text-gray-700'>
+            <FiFile className='mr-2 text-yellow-400' /> Document Details
+          </h3>
+          <div className='space-y-2 text-gray-600'>
+            <p>
+              <span className='font-medium'>File Name:</span> {state.file?.name}
+            </p>
+            <p>
+              <span className='font-medium'>File Type:</span> {state.file?.type}
+            </p>
+            <p>
+              <span className='font-medium'>File Size:</span>{' '}
+              {state.file
+                ? `${(state.file.size / 1024 / 1024).toFixed(2)} MB`
+                : 'N/A'}
+            </p>
+            <p>
+              <span className='font-medium'>IPFS Hash:</span>{' '}
+              {state.ipfsHash || 'Not uploaded yet'}
+            </p>
+          </div>
         </div>
-        <div className='mb-4'>
-          <p>
-            <strong>IPFS Hash:</strong> {state.ipfsHash || 'Not uploaded yet'}
-          </p>
-        </div>
-      </div>
 
-      <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
-        <h3 className='text-lg font-semibold mb-4 flex items-center'>
-          <FiUsers className='mr-2' /> Recipients
-        </h3>
-        {state.recipients && state.recipients.length > 0 ? (
-          <ul className='list-disc pl-5'>
-            {state.recipients.map((recipient, index) => (
-              <li key={index} className='mb-2'>
-                <strong>{recipient.name}</strong> ({recipient.email})
-                <br />
-                {recipient.web3Address && `${recipient.web3Address}`}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No recipients added</p>
-        )}
-      </div>
-
-      <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
-        <h3 className='text-lg font-semibold mb-4'>
-          Verification Requirements
-        </h3>
-        <div className='flex items-center'>
-          <p className='mr-2'>World ID Verification Required:</p>
-          {state.requireWorldID ? (
-            <FiCheck className='text-green-500' />
+        <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
+          <h3 className='text-lg font-semibold mb-4 flex items-center text-gray-700'>
+            <FiUsers className='mr-2 text-yellow-400' /> Recipients
+          </h3>
+          {state.recipients && state.recipients.length > 0 ? (
+            <ul className='space-y-2'>
+              {state.recipients.map((recipient, index) => (
+                <li key={index} className='bg-gray-50 p-3 rounded-md'>
+                  <p className='font-medium'>{recipient.web3Address}</p>
+                </li>
+              ))}
+            </ul>
           ) : (
-            <FiX className='text-red-500' />
+            <p className='text-gray-600'>No recipients added</p>
           )}
         </div>
-      </div>
 
-      {error && (
-        <div
-          className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4'
-          role='alert'
-        >
-          <strong className='font-bold'>Error: </strong>
-          <span className='block sm:inline'>{error}</span>
+        <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
+          <h3 className='text-lg font-semibold mb-4 flex items-center text-gray-700'>
+            <FiCheckCircle className='mr-2 text-yellow-400' /> Verification
+            Requirements
+          </h3>
+          <div className='flex items-center text-gray-600'>
+            <p className='mr-2'>World ID Verification Required:</p>
+            {state.requireWorldID ? (
+              <FiCheckCircle className='text-green-500 text-xl' />
+            ) : (
+              <FiXCircle className='text-red-500 text-xl' />
+            )}
+          </div>
         </div>
-      )}
 
-      <div className='flex justify-between mt-6'>
-        <button
-          onClick={onPrev}
-          className='bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-300'
-          disabled={isLoading}
-        >
-          Previous
-        </button>
-        <button
-          onClick={handleConfirm}
-          className={`bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300 ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Initiating...' : 'Confirm and Continue'}
-        </button>
-      </div>
-    </div>
+        {error && (
+          <div
+            className='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md flex items-center'
+            role='alert'
+          >
+            <FiAlertTriangle className='mr-2 text-xl' />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <div className='flex justify-between mt-6'>
+          <button
+            onClick={onPrev}
+            className='bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-300'
+            disabled={isLoading}
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleConfirm}
+            className={`bg-yellow-400 text-white px-4 py-2 rounded-md hover:bg-yellow-500 transition-colors duration-300 ${
+              isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Initiating...' : 'Confirm and Continue'}
+          </button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
