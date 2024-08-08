@@ -31,6 +31,7 @@
     "@worldcoin/idkit": "^1.2.2",
     "@worldcoin/idkit-core": "^1.2.2",
     "axios": "^1.7.3",
+    "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "crypto": "^1.0.1",
@@ -49,6 +50,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.6.4",
     "@types/formidable": "^3.4.5",
     "@types/node": "^18.19.26",
     "@types/pako": "^2.0.3",

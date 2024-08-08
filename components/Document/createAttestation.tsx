@@ -177,8 +177,8 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
   return (
     <Card className='max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden'>
       <CardHeader className='border-b border-yellow-500'>
-        <CardTitle className='text-2xl font-bold text-yellow-900'>
-          Create Attestation
+        <CardTitle className='text-2xl font-bold text-gray-500'>
+          Sign your Document
         </CardTitle>
       </CardHeader>
       <CardContent className='p-6'>
@@ -210,7 +210,7 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
                   </h3>
                   <p className='text-sm text-gray-600 mb-4'>
                     You must complete World ID verification before creating the
-                    attestation.
+                    signature attestation.
                   </p>
                   <IDKitWidget
                     action={action}
@@ -305,7 +305,8 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
               </div>
               <div className='ml-3'>
                 <p className='text-sm text-yellow-700'>
-                  The document is now locked and cannot be edited.
+                  The document is now locked and cannot be edited. You can be
+                  the first signature on this document, otherwise just share it!
                 </p>
               </div>
             </div>
@@ -325,10 +326,7 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
             }}
             passHref
           >
-            <button
-              disabled={!state.attestation}
-              className='bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 disabled:bg-gray-400 transition-colors duration-300'
-            >
+            <button className='bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 disabled:bg-gray-400 transition-colors duration-300'>
               View Document
             </button>
           </Link>

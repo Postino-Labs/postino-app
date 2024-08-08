@@ -2,7 +2,12 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useDocumentContext } from '@/contexts/DocumentContext';
 import DocumentView from './documentView';
-import { FiCheckCircle } from 'react-icons/fi';
+import { FiCheckCircle, FiArrowLeft, FiArrowRight } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 const SuccessView: React.FC = () => {
   const { state, setState } = useDocumentContext();
@@ -39,47 +44,80 @@ const SuccessView: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    // Trigger confetti animation on component mount
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  }, []);
+
   const handleBackToDashboard = () => {
     resetState();
     router.push('/dashboard'); // Adjust this route as needed
   };
 
   return (
-    <div className='max-w-4xl mx-auto p-6'>
-      <div className='bg-green-100 border-l-4 border-green-500 p-4 mb-6'>
-        <div className='flex'>
-          <div className='flex-shrink-0'>
-            <FiCheckCircle className='h-5 w-5 text-green-500' />
-          </div>
-          <div className='ml-3'>
-            <p className='text-lg font-medium text-green-800'>
-              Document Successfully Attested!
-            </p>
-            <p className='text-sm text-green-700 mt-2'>
-              Your document has been successfully uploaded, attested, and is now
-              ready for signing.
-            </p>
-          </div>
-        </div>
-      </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className='max-w-4xl mx-auto p-6'
+    >
+      <Card className='mb-8 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'>
+        <CardHeader>
+          <CardTitle className='text-3xl font-bold text-white flex items-center'>
+            <FiCheckCircle className='mr-2' />
+            Congratulations!
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className='text-xl text-white'>
+            Your document has been successfully attested and is now ready for
+            signing!
+          </p>
+        </CardContent>
+      </Card>
 
-      <DocumentView
-        file={displayState.file}
-        ipfsHash={displayState.ipfsHash}
-        recipients={displayState?.recipients || []}
-        requireWorldID={displayState.requireWorldID}
-        attestationId={displayState.attestationId}
-      />
+      <Card className='mb-8'>
+        <CardHeader>
+          <CardTitle className='text-2xl font-bold text-gray-800'>
+            Document Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DocumentView
+            file={displayState.file}
+            ipfsHash={displayState.ipfsHash}
+            recipients={displayState?.recipients || []}
+            requireWorldID={displayState.requireWorldID}
+            attestationId={displayState.attestationId}
+          />
+        </CardContent>
+      </Card>
 
-      <div className='mt-6'>
-        <button
+      <motion.div
+        className='mt-6 flex flex-row justify-between'
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.3 }}
+      >
+        <Button
           onClick={handleBackToDashboard}
-          className='bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300'
+          className='bg-yellow-400 text-white px-6 py-3 rounded-md hover:bg-yellow-500 transition-colors duration-300 text-lg font-semibold flex items-center'
         >
+          <FiArrowLeft className='mr-2' />
           Back to Dashboard
-        </button>
-      </div>
-    </div>
+        </Button>
+        <Link href={`/document/${displayState.ipfsHash}`}>
+          <Button className='bg-yellow-400 text-white px-6 py-3 rounded-md hover:bg-yellow-500 transition-colors duration-300 text-lg font-semibold flex items-center'>
+            <FiArrowRight className='mr-2' />
+            Check Document
+          </Button>
+        </Link>
+      </motion.div>
+    </motion.div>
   );
 };
 

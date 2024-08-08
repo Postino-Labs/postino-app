@@ -155,7 +155,7 @@ const CreateDocument: React.FC<{
   return (
     <Card className='max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden'>
       <CardHeader className='border-b border-yellow-500'>
-        <CardTitle className='text-2xl font-bold text-yellow-900'>
+        <CardTitle className='text-2xl font-bold text-gray-500'>
           Create a New Document
         </CardTitle>
       </CardHeader>

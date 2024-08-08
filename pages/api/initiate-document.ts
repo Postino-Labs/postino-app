@@ -64,15 +64,16 @@ export default async function handler(
     }
 
     // Store the document in Supabase
+    const expectedSignatures = recipients.length + 1; // Add 1 for the creator
     const { data, error } = await supabase
       .from('pending_documents')
       .insert({
         ipfs_hash: ipfsHash,
-        required_signatures: requiredSignatures,
+        required_signatures: expectedSignatures, // Add 1 for the creator
         worldcoin_proof_required: worldcoinProofRequired,
         signatures: [],
         creator_id: creator.id,
-        remaining_signatures: requiredSignatures,
+        remaining_signatures: expectedSignatures,
         recipients: recipients,
       })
       .select()

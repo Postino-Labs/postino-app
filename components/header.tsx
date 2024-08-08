@@ -9,11 +9,10 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { openAuthModal } = useAuthModal();
 
   const handleSignOut = async () => {
-    if (authType === 'worldcoin') {
+    try {
       await signOut();
-    } else if (authType === 'alchemy') {
       await logout();
-    }
+    } catch (error) {}
   };
   return (
     <header className='bg-transparent border-b border-gray-200'>

@@ -77,6 +77,9 @@ const DocumentStepper: React.FC = () => {
   };
 
   const renderStep = () => {
+    if (state.attestation) {
+      return <SuccessView />;
+    }
     switch (state.currentStep) {
       case 1:
         return <CreateDocument onNext={nextStep} />;
@@ -86,14 +89,12 @@ const DocumentStepper: React.FC = () => {
         return <ReviewStep onNext={nextStep} onPrev={prevStep} />;
       case 4:
         return <CreateAttestation onNext={nextStep} onPrev={prevStep} />;
-      case 5:
-        return <SuccessView />;
       default:
         return null;
     }
   };
 
-  const showSteps = state.currentStep <= steps.length;
+  const showSteps = state.currentStep <= steps.length && !state.attestation;
 
   return (
     <Layout>
@@ -152,25 +153,28 @@ const DocumentStepper: React.FC = () => {
             </CardContent>
           </Card>
         )}
-        {isDocumentLocked && state.currentStep < steps.length && (
-          <motion.div
-            className='bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6'
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className='flex'>
-              <div className='flex-shrink-0'>
-                <FiLock className='h-5 w-5 text-yellow-500' />
+        {isDocumentLocked &&
+          state.currentStep < steps.length &&
+          !state.attestation && (
+            <motion.div
+              className='bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6'
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className='flex'>
+                <div className='flex-shrink-0'>
+                  <FiLock className='h-5 w-5 text-yellow-500' />
+                </div>
+                <div className='ml-3'>
+                  <p className='text-sm text-yellow-700'>
+                    The document is locked. You cannot go back to previous
+                    steps.
+                  </p>
+                </div>
               </div>
-              <div className='ml-3'>
-                <p className='text-sm text-yellow-700'>
-                  The document is locked. You cannot go back to previous steps.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
         <motion.div
           key={state.currentStep}
           initial={{ opacity: 0, y: 20 }}

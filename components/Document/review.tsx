@@ -82,7 +82,7 @@ const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
   return (
     <Card className='max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden'>
       <CardHeader className='border-b border-yellow-500'>
-        <CardTitle className='text-2xl font-bold text-yellow-900'>
+        <CardTitle className='text-2xl font-bold text-gray-500'>
           Review Document
         </CardTitle>
       </CardHeader>
@@ -168,7 +168,7 @@ const ReviewStep: React.FC<{ onNext: () => void; onPrev: () => void }> = ({
             }`}
             disabled={isLoading}
           >
-            {isLoading ? 'Initiating...' : 'Confirm and Continue'}
+            {isLoading ? 'Initiating...' : 'Confirm and Create'}
           </button>
         </div>
       </CardContent>
