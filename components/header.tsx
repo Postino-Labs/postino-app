@@ -2,6 +2,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { truncate } from '@/utils/truncate';
 import { useAuthModal, useLogout } from '@account-kit/react';
 import { signIn, signOut } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
+import { Globe, LogOut, Menu } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { user, isAuthenticated, authType } = useAuth();
@@ -14,67 +17,71 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
       await logout();
     } catch (error) {}
   };
+
   return (
-    <header className='bg-transparent border-b border-gray-200'>
+    <header className='bg-white border-b border-gray-200 shadow-sm'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='flex justify-between h-16'>
-          <div className='flex'>
-            <button
-              className='md:hidden -ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500'
+        <div className='flex justify-between items-center h-16'>
+          <div className='flex items-center'>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='md:hidden mr-2'
               onClick={onMenuClick}
             >
-              <span className='sr-only'>Open sidebar</span>
-              {/* Heroicon name: menu */}
-              <svg
-                className='h-6 w-6'
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-                aria-hidden='true'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth='2'
-                  d='M4 6h16M4 12h16M4 18h16'
-                />
-              </svg>
-            </button>
+              <Menu className='h-6 w-6' />
+            </Button>
           </div>
-          {!isAuthenticated && (
-            <div className='flex flex-row gap-2 items-center'>
-              <a
-                className='btn btn-primary'
-                href={`/api/auth/signin`}
+
+          {!isAuthenticated ? (
+            <div className='flex space-x-2'>
+              <Button
+                variant='outline'
+                className='flex items-center'
                 onClick={(e: any) => {
                   e.preventDefault();
                   signIn('worldcoin');
                 }}
               >
-                Login w Worldcoin
-              </a>
-              <button className='btn btn-secondary' onClick={openAuthModal}>
-                Login w Alchemy
-              </button>
+                <Image
+                  src='/worldcoin-org-wld-logo.png'
+                  alt='Worldcoin'
+                  width={20}
+                  height={20}
+                  className='mr-2'
+                />
+                Worldcoin Login
+              </Button>
+              <Button
+                variant='outline'
+                className='flex items-center'
+                onClick={openAuthModal}
+              >
+                <Globe className='h-5 w-5 mr-2' />
+                Web3 Login
+              </Button>
             </div>
-          )}
-          {isAuthenticated && (
-            <div className='flex items-center'>
-              <span className='text-sm text-gray-600 mr-2 hidden sm:inline'>
-                Signed in with {authType} as
-              </span>
-              <span className='text-sm font-medium text-gray-900 bg-gray-100 px-3 py-1 rounded-full truncate max-w-[200px]'>
-                {authType === 'worldcoin'
-                  ? user?.email ?? truncate(user.name)
-                  : truncate(user.address)}
-              </span>
-              <button
-                className='ml-4 text-sm text-gray-600 hover:text-gray-900'
+          ) : (
+            <div className='flex items-center space-x-4'>
+              <div className='flex flex-col items-end'>
+                <span className='text-sm text-gray-600'>
+                  Signed in with {authType}
+                </span>
+                <span className='text-sm font-medium text-gray-900 bg-gray-100 px-3 py-1 rounded-full truncate max-w-[200px]'>
+                  {authType === 'worldcoin'
+                    ? user?.email ?? truncate(user.name)
+                    : truncate(user.address)}
+                </span>
+              </div>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='text-gray-600 hover:text-gray-900'
                 onClick={handleSignOut}
               >
+                <LogOut className='h-4 w-4 mr-2' />
                 Sign out
-              </button>
+              </Button>
             </div>
           )}
         </div>

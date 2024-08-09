@@ -29,22 +29,33 @@ export default function Sidebar() {
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className='flex justify-center relative py-8'>
-          <Image
-            src='/postino.png'
-            alt='Postino'
-            width={200}
-            height={200}
-            className='z-10 relative'
-          />
-        </div>
-        <nav className='flex-grow px-4'>
+        <motion.div
+          className='flex flex-col items-center justify-center py-6'
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <Image src='/postino.png' alt='Postino' width={160} height={40} />
+          <motion.span
+            className='text-xl font-bold text-yellow-600 mt-[-40px]'
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            postino
+          </motion.span>
+        </motion.div>
+
+        <nav className='flex-grow px-4 mt-6'>
           <ul className='space-y-2'>
-            {navItems.map((item) => (
+            {navItems.map((item, index) => (
               <motion.li
                 key={item.href}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 + index * 0.1, duration: 0.3 }}
               >
                 <Link href={item.href} passHref>
                   <Button
@@ -66,7 +77,12 @@ export default function Sidebar() {
             ))}
           </ul>
         </nav>
-        <div className='px-4 py-6'>
+        <motion.div
+          className='px-4 py-6'
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+        >
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link href='/new' passHref>
               <Button className='w-full bg-yellow-400 text-white hover:bg-yellow-500 rounded-lg shadow-md text-base font-medium'>
@@ -75,7 +91,7 @@ export default function Sidebar() {
               </Button>
             </Link>
           </motion.div>
-        </div>
+        </motion.div>
       </motion.aside>
     </AnimatePresence>
   );

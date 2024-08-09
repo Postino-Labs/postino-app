@@ -5,7 +5,15 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, Share2, Eye, Zap } from 'lucide-react';
+import {
+  FileText,
+  Share2,
+  Eye,
+  Zap,
+  LogIn,
+  CheckCircle,
+  Shield,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Dashboard() {
@@ -13,7 +21,7 @@ export default function Dashboard() {
   const [pendingDocs, setPendingDocs] = useState<any[]>([]);
   const [signedDocs, setSignedDocs] = useState<any[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(true);
-
+  console.log({ account });
   useEffect(() => {
     if (isLoading) return;
     fetchDocuments();
@@ -52,20 +60,136 @@ export default function Dashboard() {
     </div>
   );
 
+  const NotLoggedInView = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className='space-y-12'
+    >
+      <div className='text-center'>
+        <motion.h1
+          className='text-4xl font-bold text-yellow-600 mb-4'
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          Welcome to Postino
+        </motion.h1>
+        <motion.p
+          className='text-xl text-gray-600 mb-8'
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          Revolutionizing document signing with cutting-edge Web3 security
+        </motion.p>
+      </div>
+
+      <div className='grid md:grid-cols-3 gap-8'>
+        {[
+          {
+            title: 'Create',
+            icon: Zap,
+            description: 'Easily create and upload documents for signing',
+          },
+          {
+            title: 'Sign',
+            icon: FileText,
+            description: 'Securely sign documents with unparalleled protection',
+          },
+          {
+            title: 'Manage',
+            icon: Eye,
+            description: 'Track and manage all your documents in one place',
+          },
+        ].map((feature, index) => (
+          <motion.div
+            key={feature.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 + index * 0.1, duration: 0.5 }}
+          >
+            <Card className='text-center h-full flex flex-col justify-between'>
+              <CardHeader>
+                <feature.icon className='w-12 h-12 mx-auto text-yellow-500 mb-4' />
+                <CardTitle>{feature.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className='text-gray-600'>{feature.description}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.div
+        className='bg-gray-100 p-8 rounded-lg'
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+      >
+        <h2 className='text-2xl font-bold mb-4 text-center'>
+          Unmatched Security with Postino
+        </h2>
+        <ul className='space-y-4'>
+          {[
+            {
+              title: 'Worldcoin Identity Verification',
+              description:
+                'Ensure signer authenticity with biometric-based identity verification, providing an unparalleled level of trust and security.',
+            },
+            {
+              title: 'Ethereum Attestation Service (EAS)',
+              description:
+                'Leverage the power of blockchain to create tamper-proof, verifiable records of every signature and document state.',
+            },
+            {
+              title: 'Web3 Technology',
+              description:
+                'Utilize decentralized infrastructure to eliminate single points of failure and enhance data integrity.',
+            },
+            {
+              title: 'Real-time Tracking',
+              description:
+                'Monitor document status and signatures in real-time, ensuring transparency throughout the signing process.',
+            },
+          ].map((point, index) => (
+            <motion.li
+              key={index}
+              className='flex items-start'
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.9 + index * 0.1, duration: 0.5 }}
+            >
+              <Shield className='h-6 w-6 text-yellow-500 mr-3 mt-1 flex-shrink-0' />
+              <div>
+                <h3 className='font-semibold text-lg'>{point.title}</h3>
+                <p className='text-gray-600'>{point.description}</p>
+              </div>
+            </motion.li>
+          ))}
+        </ul>
+      </motion.div>
+    </motion.div>
+  );
+
   return (
     <div className='max-w-6xl mx-auto space-y-8 p-6 '>
-      <motion.h1
-        className='text-4xl font-bold text-gray-500 mb-8'
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        Welcome to Your Dashboard
-      </motion.h1>
+      {account && (
+        <motion.h1
+          className='text-4xl font-bold text-gray-500 mb-8'
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          Welcome to your Dashboard
+        </motion.h1>
+      )}
 
       {isLoadingDocs ? (
         <LoadingSkeleton />
-      ) : (
+      ) : account ? (
         <div className='grid md:grid-cols-2 gap-8'>
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -211,6 +335,8 @@ export default function Dashboard() {
             </Card>
           </motion.div>
         </div>
+      ) : (
+        <NotLoggedInView />
       )}
     </div>
   );
