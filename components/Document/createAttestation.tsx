@@ -23,7 +23,7 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
   const signer = useSigner();
   const { status: signerStatus } = useSignerStatus();
 
-  const { user, authType } = useAuth();
+  const { account, user, authType } = useAuth();
   const { state, setState } = useDocumentContext();
   const [isCreatingAttestation, setIsCreatingAttestation] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +120,8 @@ const CreateAttestation: React.FC<CreateAttestationProps> = ({
         payload = {
           ipfsHash: state.ipfsHash,
           worldcoinProof: creatorSignatureObj.proof,
-          worldcoinId: creatorId,
+          worldcoinId: authType === 'worldcoin' ? account : null,
+          ethereumAddress: authType === 'alchemy' ? account : null,
         };
       } else {
         payload = {

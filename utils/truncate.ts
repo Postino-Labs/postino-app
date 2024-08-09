@@ -20,7 +20,9 @@ export function truncate(
   address: string,
   { nPrefix, nSuffix, separator }: Params = {}
 ) {
-  const match = address.match(/^(0x[a-zA-Z0-9])[a-zA-Z0-9]+([a-zA-Z0-9])$/);
+  if (!address) return '';
+  // const match = address.match(/^(0x[a-zA-Z0-9])[a-zA-Z0-9]+([a-zA-Z0-9])$/);
+  const match = true;
   const nTotalIsLongerThanAddress =
     (nPrefix || 0) + (nSuffix || 0) > address.length;
 

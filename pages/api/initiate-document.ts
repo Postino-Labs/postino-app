@@ -64,7 +64,7 @@ export default async function handler(
     }
 
     // Store the document in Supabase
-    const expectedSignatures = recipients.length + 1; // Add 1 for the creator
+    const expectedSignatures = requiredSignatures + 1; // Add 1 for the creator
     const { data, error } = await supabase
       .from('pending_documents')
       .insert({

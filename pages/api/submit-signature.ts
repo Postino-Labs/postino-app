@@ -6,7 +6,7 @@ import {
   EAS,
   SignedOffchainAttestation,
 } from '@ethereum-attestation-service/eas-sdk';
-import { ethers, Wallet } from 'ethers';
+import { ethers } from 'ethers';
 import { signatureSchemaEncoder, signatureSchemaUID } from '@/utils/eas';
 import crypto from 'crypto';
 
@@ -83,10 +83,6 @@ async function getOrCreateUser(
       .eq('worldcoin_id', worldcoinId)
       .single();
 
-    if (error && error.code !== 'PGRST116') {
-      throw error;
-    }
-
     user = data;
 
     if (!user) {
@@ -105,16 +101,13 @@ async function getOrCreateUser(
       .eq('ethereum_address', ethereumAddress)
       .single();
 
-    if (error && error.code !== 'PGRST116') {
-      throw error;
-    }
-
     user = data;
 
     if (!user) {
       const { data: newUser, error: createError } = await supabase
         .from('users')
         .insert({ ethereum_address: ethereumAddress })
+        .select()
         .single();
 
       if (createError) throw createError;
@@ -211,7 +204,7 @@ export default async function handler(
     ]);
 
     const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-    const wallet = new Wallet(process.env.ATTESTOR_PRIVATE_KEY!);
+    const wallet = new ethers.Wallet(process.env.ATTESTOR_PRIVATE_KEY!);
     const signer = wallet.connect(provider);
     await eas.connect(signer as any);
 
@@ -242,7 +235,6 @@ export default async function handler(
       .update({
         signatures: [...document.signatures, newAttestationUID],
         remaining_signatures: document.remaining_signatures - 1,
-        encoded_offchain_attestation: JSON.stringify(offchainAttestation),
       })
       .eq('id', document.id)
       .select()
@@ -250,15 +242,32 @@ export default async function handler(
 
     if (updateError) throw updateError;
 
-    // Link the signature to the user
-    const { error: linkError } = await supabase.from('user_signatures').insert({
-      user_id: user.id,
-      document_id: document.id,
-      attestation_uid: newAttestationUID,
-    });
+    // Link the signature to the user and store the encoded attestation
+    const { data: insertedSignature, error: linkError } = await supabase
+      .from('user_signatures')
+      .upsert(
+        {
+          user_id: user.id,
+          document_id: document.id,
+          attestation_uid: newAttestationUID,
+          attestation: JSON.stringify(offchainAttestation),
+        },
+        {
+          onConflict: 'user_id,document_id',
+          ignoreDuplicates: true,
+        }
+      )
+      .select()
+      .single();
 
-    if (linkError) throw linkError;
+    if (linkError) {
+      console.error('Error linking signature:', linkError);
+      throw linkError;
+    }
 
+    if (!insertedSignature) {
+      throw new Error('Failed to insert or update signature');
+    }
     const isComplete = updatedDocument.remaining_signatures === 0;
 
     res.status(200).json({

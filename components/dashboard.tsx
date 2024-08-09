@@ -1,28 +1,50 @@
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/utils/supabase';
-import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { toast, Toaster } from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  FileText,
-  Share2,
-  Eye,
-  Zap,
-  LogIn,
-  CheckCircle,
-  Shield,
-} from 'lucide-react';
+import { FileText, Share2, Eye, Zap, CheckCircle, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { truncate } from '@/utils/truncate';
 
 const DocumentItem = ({ doc, type }: any) => {
+  const router = useRouter();
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCardClick = () => {
+    router.push(
+      `/document/${
+        type === 'signed' ? doc.pending_documents.ipfs_hash : doc.ipfs_hash
+      }`
+    );
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/document/${
+      type === 'signed' ? doc.pending_documents.ipfs_hash : doc.ipfs_hash
+    }`;
+    navigator.clipboard.writeText(url).then(() => {
+      setIsCopied(true);
+      toast.success('Link copied to clipboard!');
+      setTimeout(() => setIsCopied(false), 2000);
+    });
+  };
+
   return (
-    <div className='flex justify-between items-center p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200'>
+    <div
+      className='flex justify-between items-center p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 cursor-pointer'
+      onClick={handleCardClick}
+    >
       <div>
         <h3 className='font-medium text-lg'>
-          Document {type === 'signed' ? doc.pending_documents.id : doc.id}
+          Document{' '}
+          {(type === 'signed' ? doc.pending_documents.ipfs_hash : doc.ipfs_hash)
+            ?.toString()
+            .slice(-10)}
         </h3>
         {type === 'assigned' && (
           <p className='text-sm text-gray-600'>
@@ -31,7 +53,14 @@ const DocumentItem = ({ doc, type }: any) => {
         )}
         {type !== 'signed' && (
           <p className='text-sm text-gray-600'>
-            Remaining signatures: {doc.remaining_signatures}
+            {doc.remaining_signatures > 0 ? (
+              `Remaining signatures: ${doc.remaining_signatures}`
+            ) : (
+              <div className='flex flex-row items-center gap-2'>
+                Signatures completed
+                <CheckCircle className='h-4 w-4 text-green-500' />
+              </div>
+            )}
           </p>
         )}
         {type === 'signed' && (
@@ -40,23 +69,15 @@ const DocumentItem = ({ doc, type }: any) => {
           </p>
         )}
       </div>
-      <Link
-        href={{
-          pathname: `/document/${
-            type === 'signed' ? doc.pending_documents.ipfs_hash : doc.ipfs_hash
-          }`,
-        }}
-        passHref
+      <Button
+        variant='ghost'
+        size='sm'
+        className='text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50'
+        onClick={handleShare}
       >
-        <Button
-          variant='ghost'
-          size='sm'
-          className='text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50'
-        >
-          <Eye className='mr-2 h-4 w-4' />
-          View
-        </Button>
-      </Link>
+        <Share2 className='mr-2 h-4 w-4' />
+        {isCopied ? 'Copied!' : 'Share'}
+      </Button>
     </div>
   );
 };
@@ -68,7 +89,7 @@ export default function Dashboard() {
   const [assignedDocs, setAssignedDocs] = useState<any[]>([]);
 
   const [isLoadingDocs, setIsLoadingDocs] = useState(true);
-  console.log({ account });
+
   useEffect(() => {
     if (isLoading) return;
     fetchDocuments();
@@ -236,6 +257,7 @@ export default function Dashboard() {
 
   return (
     <div className='max-w-6xl mx-auto space-y-8 p-6'>
+      <Toaster position='top-right' />
       {account && (
         <motion.h1
           className='text-4xl font-bold text-gray-700 mb-8'
@@ -290,7 +312,7 @@ export default function Dashboard() {
               <Card className='shadow-sm hover:shadow-md transition-shadow duration-200 h-full'>
                 <CardHeader className='border-b border-gray-100'>
                   <CardTitle className='flex items-center text-xl'>
-                    <FileText className='mr-2 h-6 w-6 text-blue-500' />
+                    <FileText className='mr-2 h-6 w-6 text-yellow-500' />
                     Assigned Documents
                   </CardTitle>
                 </CardHeader>

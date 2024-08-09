@@ -98,14 +98,14 @@ const CreateDocument: React.FC<{
       newErrors.push('Required signatures must be greater than 0.');
     }
 
-    if (
-      state.recipients.length > 0 &&
-      state.requiredSignatures > state.recipients.length
-    ) {
-      newErrors.push(
-        'Required signatures cannot exceed the number of recipients.'
-      );
-    }
+    // if (
+    //   state.recipients.length > 0 &&
+    //   state.requiredSignatures > state.recipients.length
+    // ) {
+    //   newErrors.push(
+    //     'Required signatures cannot exceed the number of recipients.'
+    //   );
+    // }
 
     setErrors(newErrors);
     return newErrors.length === 0;
@@ -222,12 +222,6 @@ const CreateDocument: React.FC<{
               min='1'
               className='mt-1 border-yellow-300 focus:border-yellow-500 focus:ring focus:ring-yellow-200 focus:ring-opacity-50'
             />
-            {state.recipients.length > 0 &&
-              state.requiredSignatures > state.recipients.length && (
-                <p className='text-sm text-yellow-600 mt-1'>
-                  Note: Required signatures exceed the number of recipients.
-                </p>
-              )}
           </div>
           <div className='bg-gray-50 p-4 rounded-lg'>
             <h2 className='text-lg font-semibold mb-2 text-gray-700'>

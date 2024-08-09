@@ -1,7 +1,7 @@
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import Header from './header';
 import Sidebar from './sidebar';
-import { useState } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);

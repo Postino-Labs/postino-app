@@ -14,10 +14,7 @@ export const config = createConfig(
   {
     // authentication ui config - your customizations here
     auth: {
-      sections: [
-        [{ type: 'email' }],
-        [{ type: 'passkey' }, { type: 'injected' }],
-      ],
+      sections: [[{ type: 'email' }], [{ type: 'injected' }]],
       // addPasskeyOnSignup: true,
       // showSignInText: true,
     },
