@@ -7,7 +7,7 @@ import { Twitter, Github } from 'lucide-react';
 const teamMembers = [
   {
     name: 'mateodazab',
-    image: '/pfp.jpg',
+    image: '/pfp1.jpg',
     twitter: 'https://twitter.com/mateodazab',
     github: 'https://github.com/mateodaza',
   },

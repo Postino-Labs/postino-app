@@ -19,7 +19,10 @@ export default function App({
       <Providers>
         <Contexts>
           <Head>
-            <link rel='shortcut icon' href='/favicon.ico' />
+            <link
+              rel='shortcut icon'
+              href='https://www.postino.xyz/favicon.ico'
+            />
           </Head>
           <Component {...pageProps} />
         </Contexts>
