@@ -187,7 +187,7 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          Revolutionizing document signing with cutting-edge Web3 security
+          Revolutionizing document signing with web3 security
         </motion.p>
       </div>
 
@@ -235,7 +235,7 @@ export default function Dashboard() {
         transition={{ delay: 0.8, duration: 0.5 }}
       >
         <h2 className='text-2xl font-bold mb-4 text-center'>
-          Unmatched Security with Postino
+          Unmatched Security and Reliability with Postino
         </h2>
         <ul className='space-y-4'>
           {[

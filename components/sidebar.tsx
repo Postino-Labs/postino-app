@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Home, FileText, Users, Plus } from 'lucide-react';
+import { Home, MailQuestion, FileText, Users, Plus } from 'lucide-react';
 
 const Sidebar: React.FC = React.memo(() => {
   const router = useRouter();
@@ -12,6 +12,7 @@ const Sidebar: React.FC = React.memo(() => {
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
+    { href: '/how', label: 'How it Works', icon: MailQuestion },
     { href: '/templates', label: 'Templates', icon: FileText },
     { href: '/team', label: 'Team', icon: Users },
   ];
