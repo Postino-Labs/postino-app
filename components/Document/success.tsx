@@ -27,7 +27,7 @@ const SuccessView: React.FC = () => {
       file: null,
       recipients: [],
       requiredSignatures: 1,
-      requireWorldID: false,
+      requireWorldID: true,
       ipfsHash: '',
       attestation: null,
       creatorSignature: null,
