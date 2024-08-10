@@ -104,6 +104,16 @@ export default function Dashboard() {
       .select('*, users!inner(*)')
       .eq('users.worldcoin_id', account);
 
+    if (!createdDocs || createdDocs.length === 0) {
+      let { data: createdEthDocs } = await supabase
+        .from('pending_documents')
+        .select('*, users!inner(*)')
+        .eq('users.ethereum_address', account);
+      if (createdEthDocs && createdEthDocs.length > 0) {
+        createdDocs = createdEthDocs;
+      }
+    }
+
     if (pendingError)
       console.error('Error fetching pending documents:', pendingError);
     else setPendingDocs(createdDocs || []);
