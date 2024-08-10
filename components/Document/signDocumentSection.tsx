@@ -93,7 +93,7 @@ const SignDocumentSection: React.FC<SignDocumentSectionProps> = ({
   return (
     <Card className='mb-8'>
       <CardHeader>
-        <CardTitle>Sign Document</CardTitle>
+        <CardTitle>Document Signature</CardTitle>
       </CardHeader>
       <CardContent>
         {error && (
@@ -117,6 +117,9 @@ const SignDocumentSection: React.FC<SignDocumentSectionProps> = ({
         )}
         {!signature && (
           <div>
+            <p className='mb-4 text-gray-500'>
+              First let's verify your World ID
+            </p>
             <IDKitWidget
               action={action}
               app_id={app_id}
@@ -136,10 +139,9 @@ const SignDocumentSection: React.FC<SignDocumentSectionProps> = ({
           <div>
             <p className='mb-4 text-green-600'>
               <FiCheckCircle className='inline mr-2' />
-              Verification complete
+              Verification complete, now let's create the attestation.
             </p>
             <Button
-              className='bg-yellow-400'
               onClick={handleCreateAttestation}
               disabled={isCreatingAttestation}
             >

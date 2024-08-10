@@ -7,6 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { createWalletClient, http } from 'viem';
+import { optimismSepolia } from 'viem/chains';
 import {
   Calendar,
   CheckCircle,
@@ -18,6 +20,9 @@ import {
 import SignatureTimeline from '@/components/Document/signatureTimeline';
 import { useAuth } from '@/hooks/useAuth';
 import SignDocumentSection from '@/components/Document/signDocumentSection';
+import { useSigner } from '@account-kit/react';
+import confetti from 'canvas-confetti';
+import toast, { Toaster } from 'react-hot-toast';
 
 const MotionCard = motion(Card);
 
@@ -28,6 +33,9 @@ interface DocumentType {
   remaining_signatures: number;
   required_signatures: number;
   user_signatures: any[];
+  signatures: any[];
+  worldcoin_proof_required: boolean;
+  attestation: string | null;
 }
 
 interface DocumentPreviewProps {
@@ -86,6 +94,8 @@ interface DocumentDetailsCardProps {
   hasUserSigned: boolean;
   handleSignClick: () => void;
   handleSigningComplete: () => void;
+  createAttestation: () => Promise<void>;
+  isCreatingAttestation: boolean;
   isSigningSectionVisible: boolean;
 }
 
@@ -96,6 +106,8 @@ const DocumentDetailsCard: React.FC<DocumentDetailsCardProps> = React.memo(
     hasUserSigned,
     handleSignClick,
     handleSigningComplete,
+    createAttestation,
+    isCreatingAttestation,
     isSigningSectionVisible,
   }) => (
     <MotionCard
@@ -155,7 +167,52 @@ const DocumentDetailsCard: React.FC<DocumentDetailsCardProps> = React.memo(
             </div>
           </div>
         )}
-        {hasUserSigned ? (
+        {document.remaining_signatures === 0 ? (
+          <div className='flex justify-end col-span-2 mt-4'>
+            {document.attestation ? (
+              <div className='flex flex-row gap-2'>
+                <a
+                  href={`https://optimism-sepolia.easscan.org/attestation/view/${document.attestation}`}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='self-end text-yellow-700 underline'
+                >
+                  View On-chain Attestation
+                </a>
+              </div>
+            ) : (
+              <div className='flex flex-col w-full'>
+                <p className='mb-4 text-gray-500'>
+                  All signatures have been collected. You can now create an
+                  on-chain attestation for this document. <br /> It's free :)
+                </p>
+                <Button
+                  variant='default'
+                  className='w-full'
+                  onClick={createAttestation}
+                  disabled={isCreatingAttestation}
+                >
+                  {isCreatingAttestation
+                    ? 'Creating Attestation...'
+                    : 'Create Attestation'}
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : document.remaining_signatures === 0 ? (
+          <div className='col-span-2 mt-4'>
+            <Button
+              variant='default'
+              onClick={createAttestation}
+              className='w-full'
+              disabled={isCreatingAttestation}
+            >
+              {isCreatingAttestation
+                ? 'Creating Attestation...'
+                : 'Create Attestation'}
+            </Button>
+          </div>
+        ) : hasUserSigned ? (
           <div className='col-span-2 mt-4'>
             <Badge variant='outline' className='text-center w-full py-2'>
               You have already signed this document
@@ -164,11 +221,11 @@ const DocumentDetailsCard: React.FC<DocumentDetailsCardProps> = React.memo(
         ) : canSign && !isSigningSectionVisible ? (
           <div className='col-span-2 mt-4'>
             <Button
-              variant='outline'
+              variant='default'
               onClick={handleSignClick}
               className='w-full'
             >
-              Sign Document
+              Start Document Signature
             </Button>
           </div>
         ) : canSign && isSigningSectionVisible ? (
@@ -207,12 +264,15 @@ const SignaturesTimelineCard: React.FC<SignaturesTimelineCardProps> =
 
 const DocumentDetails: React.FC = () => {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, account } = useAuth();
+  const signer = useSigner();
   const { ipfsHash } = router.query;
   const [document, setDocument] = useState<DocumentType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isFullView, setIsFullView] = useState<boolean>(false);
+  const [isCreatingAttestation, setIsCreatingAttestation] = useState(false);
+  const [attestationUID, setAttestationUID] = useState<string | null>(null);
   const [isSigningSectionVisible, setIsSigningSectionVisible] =
     useState<boolean>(false);
 
@@ -304,8 +364,50 @@ const DocumentDetails: React.FC = () => {
     </div>
   ));
 
+  const createAttestation = useCallback(async () => {
+    if (!document) return;
+
+    try {
+      setIsCreatingAttestation(true);
+
+      const response = await fetch('/api/submit-document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ documentId: document.id }),
+      });
+      console.log({ response });
+      if (!response.ok) {
+        throw new Error('Failed to create attestation');
+      }
+
+      const data = await response.json();
+      setAttestationUID(data.attestationUID);
+
+      // Trigger confetti effect
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+      });
+
+      toast.success('Attestation created successfully!');
+
+      // Refetch document details to update UI
+      if (typeof ipfsHash === 'string') {
+        await fetchDocumentDetails(ipfsHash);
+      }
+    } catch (err) {
+      console.error('Error creating attestation:', err);
+      toast.error('Failed to create attestation. Please try again.');
+    } finally {
+      setIsCreatingAttestation(false);
+    }
+  }, [document, ipfsHash, fetchDocumentDetails]);
   return (
     <Layout>
+      <Toaster position='top-right' />
       <div className='p-6 max-w-4xl mx-auto'>
         {loading ? (
           <LoadingSkeleton />
@@ -339,8 +441,10 @@ const DocumentDetails: React.FC = () => {
               canSign={canSign}
               hasUserSigned={hasUserSigned}
               handleSignClick={handleSignClick}
+              createAttestation={createAttestation}
               handleSigningComplete={handleSigningComplete}
               isSigningSectionVisible={isSigningSectionVisible}
+              isCreatingAttestation={isCreatingAttestation}
             />
 
             {document.user_signatures &&

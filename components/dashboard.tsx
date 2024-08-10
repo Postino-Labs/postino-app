@@ -121,8 +121,16 @@ export default function Dashboard() {
     // Fetch signed documents (unchanged)
     let { data: signedDocuments, error: recentError } = await supabase
       .from('user_signatures')
-      .select(`*, users!inner(worldcoin_id), pending_documents(*)`)
-      .eq('users.worldcoin_id', account)
+      .select(
+        `
+      *,
+      users!inner(ethereum_address, worldcoin_id),
+      pending_documents(*)
+    `
+      )
+      .or(
+        `users.ethereum_address.eq.${account},users.worldcoin_id.eq.${account}`
+      )
       .order('created_at', { ascending: false })
       .limit(5);
 
@@ -205,7 +213,7 @@ export default function Dashboard() {
       </div>
 
       <motion.div
-        className='bg-gray-100 p-8 rounded-lg'
+        className='bg-[#f5f0e5] p-8 rounded-lg'
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.5 }}

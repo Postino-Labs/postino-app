@@ -7,7 +7,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className='h-screen flex overflow-hidden bg-gray-100'>
+    <div className='h-screen flex overflow-hidden bg-[#F9F6F0]'>
       {/* Sidebar for mobile */}
       <div className={`md:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className='fixed inset-0 flex z-40'>

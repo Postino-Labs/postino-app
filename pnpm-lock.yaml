@@ -14,6 +14,18 @@ dependencies:
   '@account-kit/react':
     specifier: 4.0.0-alpha.10
     version: 4.0.0-alpha.10(@babel/core@7.25.2)(@babel/preset-env@7.25.3)(@tanstack/react-query@5.51.23)(@types/react@18.3.3)(react-dom@18.3.1)(react-i18next@13.5.0)(react-native@0.74.5)(react@18.3.1)(tailwindcss@3.4.9)(typescript@5.5.4)(viem@2.8.6)
+  '@account-kit/smart-contracts':
+    specifier: 4.0.0-alpha.10
+    version: 4.0.0-alpha.10(typescript@5.5.4)(viem@2.8.6)
+  '@alchemy/aa-alchemy':
+    specifier: ^3.19.0
+    version: 3.19.0(@babel/core@7.25.2)(@babel/preset-env@7.25.3)(@tanstack/react-query@5.51.23)(@types/react@18.3.3)(react-dom@18.3.1)(react-i18next@13.5.0)(react-native@0.74.5)(react@18.3.1)(tailwindcss@3.4.9)(typescript@5.5.4)(viem@2.8.6)
+  '@alchemy/aa-core':
+    specifier: ^3.19.0
+    version: 3.19.0(typescript@5.5.4)(viem@2.8.6)
+  '@alchemy/aa-ethers':
+    specifier: ^3.19.0
+    version: 3.19.0(typescript@5.5.4)(viem@2.8.6)
   '@ethereum-attestation-service/eas-sdk':
     specifier: ^2.5.0
     version: 2.5.0(typescript@5.5.4)
@@ -68,6 +80,9 @@ dependencies:
   framer-motion:
     specifier: ^11.3.23
     version: 11.3.24(react-dom@18.3.1)(react@18.3.1)
+  lightAccountClient:
+    specifier: link:snippets/aa-core/lightAccountClient
+    version: link:snippets/aa-core/lightAccountClient
   lucide-react:
     specifier: ^0.424.0
     version: 0.424.0(react@18.3.1)
@@ -101,6 +116,9 @@ dependencies:
   tailwindcss-animate:
     specifier: ^1.0.7
     version: 1.0.7(tailwindcss@3.4.9)
+  viem:
+    specifier: ^2.8.6
+    version: 2.8.6(typescript@5.5.4)(zod@3.23.8)
 
 devDependencies:
   '@types/canvas-confetti':
@@ -301,6 +319,124 @@ packages:
 
   /@adraffy/ens-normalize@1.10.1:
     resolution: {integrity: sha512-96Z2IP3mYmF1Xg2cDm8f1gWGf/HUVedQ3FMifV4kG/PQ4yEP51xDtRAEfhVNt5f/uzpNkZHwWQuUcu6D6K+Ekw==}
+    dev: false
+
+  /@alchemy/aa-accounts@3.19.0(typescript@5.5.4)(viem@2.8.6):
+    resolution: {integrity: sha512-cdR8H9LveeUyBWFkmoqU7hZnFoqmdyPQDYZRtFr9aF+3zWAQYYJ/13Vz7aoVQ4lZ57+JQj7fN5vSVn2gFI47yA==}
+    requiresBuild: true
+    peerDependencies:
+      viem: 2.8.6
+    dependencies:
+      '@alchemy/aa-core': 3.19.0(typescript@5.5.4)(viem@2.8.6)
+      viem: 2.8.6(typescript@5.5.4)(zod@3.23.8)
+    transitivePeerDependencies:
+      - typescript
+    dev: false
+    optional: true
+
+  /@alchemy/aa-alchemy@3.19.0(@babel/core@7.25.2)(@babel/preset-env@7.25.3)(@tanstack/react-query@5.51.23)(@types/react@18.3.3)(react-dom@18.3.1)(react-i18next@13.5.0)(react-native@0.74.5)(react@18.3.1)(tailwindcss@3.4.9)(typescript@5.5.4)(viem@2.8.6):
+    resolution: {integrity: sha512-18MGo0jzp6JkSOuzZHLuy4dIR1BC0P623pqdbsASMKLCoyTMKPtPR1yfgiIf8KJ8jTun6dfwwN0h7eCU1aHYcA==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.28.9
+      react: ^18.2.0
+      react-dom: ^18.2.0
+      tailwindcss: ^3.4.3
+      viem: 2.8.6
+    peerDependenciesMeta:
+      '@tanstack/react-query':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      tailwindcss:
+        optional: true
+    dependencies:
+      '@alchemy/aa-core': 3.19.0(typescript@5.5.4)(viem@2.8.6)
+      '@tanstack/react-form': 0.19.5(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
+      '@tanstack/react-query': 5.51.23(react@18.3.1)
+      '@tanstack/zod-form-adapter': 0.19.5(zod@3.23.8)
+      '@turnkey/http': 2.12.1
+      '@turnkey/iframe-stamper': 1.2.0
+      '@turnkey/viem': 0.4.25(@babel/core@7.25.2)(@babel/preset-env@7.25.3)(@types/react@18.3.3)(react@18.3.1)(viem@2.8.6)
+      '@turnkey/webauthn-stamper': 0.4.3
+      '@wagmi/connectors': 4.3.10(@types/react@18.3.3)(@wagmi/core@2.13.3)(react-dom@18.3.1)(react-i18next@13.5.0)(react-native@0.74.5)(react@18.3.1)(typescript@5.5.4)(viem@2.8.6)(zod@3.23.8)
+      '@wagmi/core': 2.13.3(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.4)(viem@2.8.6)
+      eventemitter3: 5.0.1
+      js-cookie: 3.0.5
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      tailwindcss: 3.4.9
+      viem: 2.8.6(typescript@5.5.4)(zod@3.23.8)
+      wagmi: 2.12.4(@tanstack/react-query@5.51.23)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.5)(react@18.3.1)(typescript@5.5.4)(viem@2.8.6)(zod@3.23.8)
+      zod: 3.23.8
+      zustand: 4.5.4(@types/react@18.3.3)(react@18.3.1)
+    optionalDependencies:
+      '@alchemy/aa-accounts': 3.19.0(typescript@5.5.4)(viem@2.8.6)
+      alchemy-sdk: 3.3.1
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@babel/core'
+      - '@babel/preset-env'
+      - '@capacitor/preferences'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@react-native-async-storage/async-storage'
+      - '@tanstack/query-core'
+      - '@types/react'
+      - '@upstash/redis'
+      - '@vercel/kv'
+      - bufferutil
+      - debug
+      - encoding
+      - immer
+      - ioredis
+      - react-i18next
+      - react-native
+      - rollup
+      - supports-color
+      - typescript
+      - uWebSockets.js
+      - utf-8-validate
+    dev: false
+
+  /@alchemy/aa-core@3.19.0(typescript@5.5.4)(viem@2.8.6):
+    resolution: {integrity: sha512-gVSesLsXORMuiA3w/w+4eQikzrikpj1XN2Sbrcik0v25AKH5QrHn0HddhyrN1aCFW2NoXjyhwxlySiTDVfTgxQ==}
+    peerDependencies:
+      viem: 2.8.6
+    dependencies:
+      abitype: 0.8.11(typescript@5.5.4)(zod@3.23.8)
+      eventemitter3: 5.0.1
+      viem: 2.8.6(typescript@5.5.4)(zod@3.23.8)
+      zod: 3.23.8
+    transitivePeerDependencies:
+      - typescript
+    dev: false
+
+  /@alchemy/aa-ethers@3.19.0(typescript@5.5.4)(viem@2.8.6):
+    resolution: {integrity: sha512-kdlWQNG2FqpId9HNQ94FIMHhp8bPWV+U4C9WSORqP19f7nM5ukSJAspAGMd0T1u1Ca0xCf/5KWW1EoxO1S2B0A==}
+    peerDependencies:
+      viem: 2.8.6
+    dependencies:
+      '@alchemy/aa-core': 3.19.0(typescript@5.5.4)(viem@2.8.6)
+      '@ethersproject/abi': 5.7.0
+      '@ethersproject/abstract-signer': 5.7.0
+      '@ethersproject/bytes': 5.7.0
+      '@ethersproject/contracts': 5.7.0
+      '@ethersproject/hash': 5.7.0
+      '@ethersproject/keccak256': 5.7.0
+      '@ethersproject/providers': 5.7.2
+      '@ethersproject/wallet': 5.7.0
+      viem: 2.8.6(typescript@5.5.4)(zod@3.23.8)
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
     dev: false
 
   /@alloc/quick-lru@5.2.0:
@@ -2011,7 +2147,6 @@ packages:
       '@ethersproject/bytes': 5.7.0
       '@ethersproject/properties': 5.7.0
     dev: false
-    optional: true
 
   /@ethersproject/bignumber@5.7.0:
     resolution: {integrity: sha512-n1CAdIHRWjSucQO3MC1zPSVgV/6dy/fjL9pMrPP9peL+QxEg9wOsVqwD4+818B6LUEtaXzVHQiuivzRoxPxUGw==}
@@ -2048,7 +2183,6 @@ packages:
       '@ethersproject/properties': 5.7.0
       '@ethersproject/transactions': 5.7.0
     dev: false
-    optional: true
 
   /@ethersproject/hash@5.7.0:
     resolution: {integrity: sha512-qX5WrQfnah1EFnO5zJv1v46a8HW0+E5xuBBDTwMFZLuVTx0tbU2kkx15NqdjxecrLGatQN9FGQKpb1FKdHCt+g==}
@@ -2082,7 +2216,6 @@ packages:
       '@ethersproject/transactions': 5.7.0
       '@ethersproject/wordlists': 5.7.0
     dev: false
-    optional: true
 
   /@ethersproject/json-wallets@5.7.0:
     resolution: {integrity: sha512-8oee5Xgu6+RKgJTkvEMl2wDgSPSAQ9MB/3JYjFV9jlKvcYHUXZC+cQp0njgmxdHkYWn8s6/IqIZYm0YWCjO/0g==}
@@ -2102,7 +2235,6 @@ packages:
       aes-js: 3.0.0
       scrypt-js: 3.0.1
     dev: false
-    optional: true
 
   /@ethersproject/keccak256@5.7.0:
     resolution: {integrity: sha512-2UcPboeL/iW+pSg6vZ6ydF8tCnv3Iu/8tUmLLzWWGzxWKFFqOBQFLo6uLUv6BDrLgCDfN28RJ/wtByx+jZ4KBg==}
@@ -2130,7 +2262,6 @@ packages:
       '@ethersproject/bytes': 5.7.0
       '@ethersproject/sha2': 5.7.0
     dev: false
-    optional: true
 
   /@ethersproject/properties@5.7.0:
     resolution: {integrity: sha512-J87jy8suntrAkIZtecpxEPxY//szqr1mlBaYlQ0r4RCaiD2hjheqF9s1LVE8vVuJCXisjIP+JgtK/Do54ej4Sw==}
@@ -2167,7 +2298,6 @@ packages:
       - bufferutil
       - utf-8-validate
     dev: false
-    optional: true
 
   /@ethersproject/random@5.7.0:
     resolution: {integrity: sha512-19WjScqRA8IIeWclFme75VMXSBvi4e6InrUNuaR4s5pTF2qNhcGdCUwdxUVGtDDqC00sDLCO93jPQoDUH4HVmQ==}
@@ -2176,7 +2306,6 @@ packages:
       '@ethersproject/bytes': 5.7.0
       '@ethersproject/logger': 5.7.0
     dev: false
-    optional: true
 
   /@ethersproject/rlp@5.7.0:
     resolution: {integrity: sha512-rBxzX2vK8mVF7b0Tol44t5Tb8gomOHkj5guL+HhzQ1yBh/ydjGnpw6at+X6Iw0Kp3OzzzkcKp8N9r0W4kYSs9w==}
@@ -2194,7 +2323,6 @@ packages:
       '@ethersproject/logger': 5.7.0
       hash.js: 1.1.7
     dev: false
-    optional: true
 
   /@ethersproject/signing-key@5.7.0:
     resolution: {integrity: sha512-MZdy2nL3wO0u7gkB4nA/pEf8lu1TlFswPNmy8AiYkfKTdO6eXBJyUdmHO/ehm/htHw9K/qF8ujnTyUAD+Ry54Q==}
@@ -2262,7 +2390,6 @@ packages:
       '@ethersproject/transactions': 5.7.0
       '@ethersproject/wordlists': 5.7.0
     dev: false
-    optional: true
 
   /@ethersproject/web@5.7.1:
     resolution: {integrity: sha512-Gueu8lSvyjBWL4cYsWsjh6MtMwM0+H4HvqFPZfB6dV8ctbP9zFAO73VG1cMWae0FLPCtz0peKPpZY8/ugJJX2w==}
@@ -2285,7 +2412,6 @@ packages:
       '@ethersproject/properties': 5.7.0
       '@ethersproject/strings': 5.7.0
     dev: false
-    optional: true
 
   /@fastify/busboy@2.1.1:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
@@ -4542,7 +4668,7 @@ packages:
   /@scure/bip32@1.4.0:
     resolution: {integrity: sha512-sVUpc0Vq3tXCkDGYVWGIZTRfnvu8LoTDaev7vbwh0omSvVORONr960MQWdKqJDCReIEmTj3PAr73O3aoxz7OPg==}
     dependencies:
-      '@noble/curves': 1.4.0
+      '@noble/curves': 1.4.2
       '@noble/hashes': 1.4.0
       '@scure/base': 1.1.7
     dev: false
@@ -6184,7 +6310,6 @@ packages:
     resolution: {integrity: sha512-H7wUZRn8WpTq9jocdxQ2c8x2sKo9ZVmzfRE13GiNJXfp7NcKYEdvl3vspKjXox6RIG2VtaRe4JFvxG4rqp2Zuw==}
     requiresBuild: true
     dev: false
-    optional: true
 
   /aes-js@4.0.0-beta.5:
     resolution: {integrity: sha512-G965FqalsNyrPqgEGON7nIx1e/OVENSgiEIzyC63haUMuvNnwIgIjMs52hlTCKhkBny7A2ORNlfY9Zu+jmGk1Q==}
@@ -6503,7 +6628,6 @@ packages:
     resolution: {integrity: sha512-s0IrSOzLlbvX7yp4WBfPITzpAU8sqQcpsmwXDiKwrG4r491vwCO/XpejasRNl0piBMe/DvP4Tz0mIS/X1DPJBQ==}
     requiresBuild: true
     dev: false
-    optional: true
 
   /big.js@5.2.2:
     resolution: {integrity: sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==}
@@ -12473,7 +12597,7 @@ packages:
   /webauthn-p256@0.0.5:
     resolution: {integrity: sha512-drMGNWKdaixZNobeORVIqq7k5DsRC9FnG201K2QjeOoQLmtSDaSsVZdkg6n5jUALJKcAG++zBPJXmv6hy0nWFg==}
     dependencies:
-      '@noble/curves': 1.4.0
+      '@noble/curves': 1.5.0
       '@noble/hashes': 1.4.0
     dev: false
 
@@ -12654,7 +12778,6 @@ packages:
       utf-8-validate:
         optional: true
     dev: false
-    optional: true
 
   /ws@7.5.10:
     resolution: {integrity: sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==}

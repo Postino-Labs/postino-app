@@ -4,6 +4,7 @@ import { useSignerStatus, useUser } from '@account-kit/react';
 export function useAuth() {
   const { data: session, status } = useSession();
   const web3User = useUser();
+
   const signerStatus = useSignerStatus();
   const isLoading = status === 'loading' || signerStatus.isInitializing;
   const account = isLoading

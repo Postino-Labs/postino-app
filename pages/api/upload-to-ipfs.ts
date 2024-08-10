@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { IncomingForm, Files, Fields } from 'formidable';
 import fs from 'fs';
 import pinataSDK from '@pinata/sdk';
+import { Readable } from 'stream';
 
 export const config = {
   api: {
@@ -10,6 +11,10 @@ export const config = {
 };
 
 const pinata = new pinataSDK({ pinataJWTKey: process.env.PINATA_JWT });
+
+interface PinataMetadata {
+  [key: string]: string | number | null;
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -34,11 +39,38 @@ export default async function handler(
     const file = Array.isArray(fileArray) ? fileArray[0] : fileArray;
 
     try {
-      const readableStream = fs.createReadStream(file.filepath);
+      const timestamp = Date.now();
+      const originalName = file.originalFilename || 'unnamed';
+      const fileNameWithTimestamp = `${timestamp}-${originalName}`;
+
+      const metadata: PinataMetadata = {
+        name: fileNameWithTimestamp,
+        timestamp: timestamp,
+        originalFileName: originalName,
+      };
+
+      // Read the file content
+      const fileContent = await fs.promises.readFile(file.filepath);
+
+      // Append the timestamp to the file content
+      const modifiedContent = Buffer.concat([
+        fileContent,
+        Buffer.from(`\n${timestamp}`),
+      ]);
+
+      // Create a readable stream from the modified content
+      const readableStream = new Readable();
+      readableStream.push(modifiedContent);
+      readableStream.push(null);
+
       const result = await pinata.pinFileToIPFS(readableStream, {
-        pinataMetadata: { name: file.originalFilename || 'unnamed' },
+        pinataMetadata: metadata,
       });
-      res.status(200).json({ ipfsHash: result.IpfsHash });
+
+      res.status(200).json({
+        ipfsHash: result.IpfsHash,
+        fileName: fileNameWithTimestamp,
+      });
     } catch (error) {
       console.error('IPFS upload error:', error);
       res.status(500).json({ error: 'Failed to upload to IPFS' });
