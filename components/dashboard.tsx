@@ -121,39 +121,22 @@ export default function Dashboard() {
     // Fetch signed documents
     let { data: signedDocuments, error: recentError } = await supabase
       .from('user_signatures')
-      .select(
-        `
-      *,
-      users!inner(ethereum_address, worldcoin_id),
-      pending_documents(*)
-    `
-      )
-      .or(
-        `users.ethereum_address.eq.${account},users.worldcoin_id.eq.${account}`
-      )
-      .order('created_at', { ascending: false })
-      .limit(5);
+      .select('*, users!inner(ethereum_address), pending_documents(*)')
+      .eq('users.ethereum_address', account)
+      .order('created_at', { ascending: false });
 
     // If the above query doesn't work, try this alternative:
     if (!signedDocuments || signedDocuments.length === 0) {
-      let { data: alternativeSignedDocuments, error: alternativeError } =
+      let { data: signedWorldcoinDocuments, error: recentError } =
         await supabase
           .from('user_signatures')
-          .select(
-            `
-        *,
-        users!inner(ethereum_address, worldcoin_id),
-        pending_documents(*)
-      `
-          )
-          .filter('users.ethereum_address', 'in', [account])
-          .filter('users.worldcoin_id', 'in', [account])
-          .order('created_at', { ascending: false })
-          .limit(5);
+          .select('*, users!inner(ethereum_address), pending_documents(*)')
+          .eq('users.ethereum_address', account)
+          .order('created_at', { ascending: false });
 
-      if (alternativeSignedDocuments && alternativeSignedDocuments.length > 0) {
-        signedDocuments = alternativeSignedDocuments;
-        recentError = alternativeError;
+      if (signedWorldcoinDocuments && signedWorldcoinDocuments.length > 0) {
+        signedDocuments = signedWorldcoinDocuments;
+        recentError = recentError;
       }
     }
     console.log({ signedDocuments });
