@@ -118,7 +118,7 @@ export default function Dashboard() {
       console.error('Error fetching assigned documents:', recipientError);
     else setAssignedDocs(assignedDocs || []);
 
-    // Fetch signed documents (unchanged)
+    // Fetch signed documents
     let { data: signedDocuments, error: recentError } = await supabase
       .from('user_signatures')
       .select(
@@ -134,6 +134,29 @@ export default function Dashboard() {
       .order('created_at', { ascending: false })
       .limit(5);
 
+    // If the above query doesn't work, try this alternative:
+    if (!signedDocuments || signedDocuments.length === 0) {
+      let { data: alternativeSignedDocuments, error: alternativeError } =
+        await supabase
+          .from('user_signatures')
+          .select(
+            `
+        *,
+        users!inner(ethereum_address, worldcoin_id),
+        pending_documents(*)
+      `
+          )
+          .filter('users.ethereum_address', 'in', [account])
+          .filter('users.worldcoin_id', 'in', [account])
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+      if (alternativeSignedDocuments && alternativeSignedDocuments.length > 0) {
+        signedDocuments = alternativeSignedDocuments;
+        recentError = alternativeError;
+      }
+    }
+    console.log({ signedDocuments });
     if (recentError)
       console.error('Error fetching signed documents:', recentError);
     else setSignedDocs(signedDocuments || []);
