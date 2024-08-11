@@ -78,7 +78,7 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(
           transition={{ duration: 0.3 }}
         >
           <iframe
-            src={`https://peach-fuzzy-woodpecker-421.mypinata.cloud/ipfs/${ipfsHash}`}
+            src={`https://chocolate-rear-grasshopper-733.mypinata.cloud/ipfs/${ipfsHash}`}
             className='w-full h-full border-0'
             title='PDF Preview'
           />

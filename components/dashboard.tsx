@@ -235,7 +235,7 @@ export default function Dashboard() {
         transition={{ delay: 0.8, duration: 0.5 }}
       >
         <h2 className='text-2xl font-bold mb-4 text-center'>
-          Unmatched Security and Reliability with Postino
+          Unmatched Security and Reliability
         </h2>
         <ul className='space-y-4'>
           {[
